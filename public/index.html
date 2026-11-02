@@ -708,12 +708,11 @@ function renderConnections() {
   else { status = "<span>לא מחובר</span>"; action = `<button class="btn sm primary" data-act="gconn">חיבור גוגל</button>`; }
   const wished = state.wishes || {};
   const soon = CONNECTORS.map(k => `<div class="conn soon"><span class="ic">${k.icon}</span><div class="t"><b>${k.name}</b><span>${k.desc}</span></div>${wished[k.id] ? `<span class="pill mod">נרשמת</span>` : `<button class="btn sm" data-act="wish" data-p="${k.id}">רוצה את זה</button>`}</div>`).join("");
-  $("#connList").innerHTML = `<div class="conn"><span class="ic">${GICON}</span><div class="t"><b>גוגל — ${what}</b>${status}</div>${action}</div>${icsCard(c.ics)}${tgCard(c.telegram)}
+  $("#connList").innerHTML = `<div class="conn"><span class="ic">${GICON}</span><div class="t"><b>גוגל — ${what}</b>${status}</div>${action}</div>${icsCard(c.ics)}
     <div class="muted" style="margin:12px 0 4px;font-size:12.5px">בקרוב — סמני מה חשוב לך ונעדכן כשזה מוכן:</div>${soon}`;
 }
-/* יומן ICS ו-טלגרם — חיבורים אמיתיים */
+/* יומן ICS — חיבור אמיתי */
 const ICON_ICS = '<svg class="i" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4M8 14h3M13 14h3M8 18h3"/></svg>';
-const ICON_TG = '<svg class="i" viewBox="0 0 24 24"><path d="M21 4L3 11l6 2 2 6 3-4 5 3z"/><path d="M9 13l8-7"/></svg>';
 function icsCard(x) {
   x = x || { available: true, connected: false };
   if (x.connected) return `<div class="conn"><span class="ic">${ICON_ICS}</span><div class="t"><b>יומן אפל / כל יומן (ICS)</b><span class="ok">מחובר · ${esc(x.label)}</span>${x.error ? `<span style="color:var(--err)">${esc(x.error).slice(0, 90)}</span>` : "<span>האירועים מופיעים בתדריך ובתכנון היום, לצד גוגל</span>"}</div><button class="btn sm" data-act="icsdisc">ניתוק</button></div>`;
@@ -721,17 +720,6 @@ function icsCard(x) {
     <details style="flex-basis:100%;margin-top:6px;font-size:13px"><summary class="muted" style="cursor:pointer">איפה מוצאים את הקישור?</summary><p class="muted" style="margin:6px 0">יומן אפל (iCloud): באפליקציית היומן במק לוחצים על היומן ← "שיתוף יומן" ← מסמנים "יומן ציבורי" ← מעתיקים את הקישור. באייפון: יומנים ← ⓘ ליד היומן ← "יומן ציבורי" ← "שיתוף קישור".<br>Outlook: הגדרות ← יומן ← יומנים משותפים ← פרסום יומן ← קישור ICS.<br>יומן גוגל אחר: הגדרות היומן ← "כתובת סודית בפורמט iCal".</p></details>
     <div class="row multi" style="flex-basis:100%"><input type="url" id="icsUrl" placeholder="webcal://… או https://…ics" dir="ltr" style="flex:1 1 220px;width:auto;text-align:left"><button class="btn sm primary" data-act="icsconn">חיבור</button></div></div>`;
 }
-function tgCard(x) {
-  x = x || {};
-  let st, act = "";
-  if (!x.available) st = "<span>בקרוב — החיבור עוד לא הוגדר בשרת</span>";
-  else if (x.linked) { st = `<span class="ok">מחובר${x.username ? " · " + esc(x.username) : ""}</span><span>אפשר לכתוב לנוני בטלגרם, והתזכורות יגיעו גם לשם</span>`; act = `<button class="btn sm" data-act="tgdisc">ניתוק</button>`; }
-  else if (x.link) { st = `<span>לחצי על "פתיחה בטלגרם" ואז על Start. הקישור תקף לחצי שעה.</span>`; act = `<a class="btn sm primary" href="${esc(x.link)}" target="_blank" rel="noopener" data-act="tgopen">פתיחה בטלגרם</a>`; }
-  else { st = "<span>לדבר עם נוני גם בטלגרם ולקבל שם תזכורות</span>"; act = `<button class="btn sm primary" data-act="tgconn">חיבור</button>`; }
-  return `<div class="conn"><span class="ic">${ICON_TG}</span><div class="t"><b>טלגרם${x.bot ? ` · <span dir="ltr">@${esc(x.bot)}</span>` : ""}</b>${st}</div>${act}</div>`;
-}
-let tgTimer;
-function tgPoll(n) { clearTimeout(tgTimer); if (n > 60) return; tgTimer = setTimeout(async () => { try { const r = await api("GET", "/api/tg/link"); state.connections.telegram = r.link; if (r.link.linked) { renderConnections(); toast("הטלגרם מחובר"); } else tgPoll(n + 1); } catch (e) {} }, 4000); }
 /* חיבורים מתוכננים (קטלוג בלבד — הצבעה, לא חיבור בפועל) */
 const CONNECTORS = [
   { id: "microsoft", name: "מיקרוסופט 365 — יומן ומייל (Outlook)", desc: "לחשבון עבודה או ארגוני", icon: '<svg class="i" viewBox="0 0 24 24"><rect x="3" y="3" width="8" height="8" rx="1"/><rect x="13" y="3" width="8" height="8" rx="1"/><rect x="3" y="13" width="8" height="8" rx="1"/><rect x="13" y="13" width="8" height="8" rx="1"/></svg>' },
@@ -747,8 +735,6 @@ $("#connList").addEventListener("click", async e => {
   if (b.dataset.act === "wish") { const pid = b.dataset.p; state.wishes = state.wishes || {}; state.wishes[pid] = true; renderConnections(); toast("נרשם — נודיע לך כשהחיבור יהיה מוכן"); if (!DEMO) { try { await api("POST", "/api/connect/wish", { provider: pid }); } catch (e) {} } return; }
   if (b.dataset.act === "icsconn") { const url = $("#icsUrl").value.trim(); if (!url) return $("#icsUrl").focus(); if (DEMO) { state.connections.ics = { available: true, connected: true, label: "iCloud" }; renderConnections(); toast("בדמו: היומן חובר"); return; } b.disabled = true; b.textContent = "בודקת…"; try { const r = await api("POST", "/api/connect/ics", { url }); state.connections = r.connections; renderConnections(); toast(`היומן חובר (${r.count} אירועים)`); } catch (err) { toast(err.message); b.disabled = false; b.textContent = "חיבור"; } return; }
   if (b.dataset.act === "icsdisc") { if (!confirm("לנתק את היומן?")) return; if (DEMO) { state.connections.ics = { available: true, connected: false }; renderConnections(); return; } try { const r = await api("DELETE", "/api/connect/ics"); state.connections = r.connections; renderConnections(); toast("נותק"); } catch (err) { toast(err.message); } return; }
-  if (b.dataset.act === "tgconn") { if (DEMO) { toast("בדמו אין חיבור לטלגרם"); return; } try { const r = await api("POST", "/api/tg/link", {}); state.connections.telegram = r.link; renderConnections(); if (r.link.link) window.open(r.link.link, "_blank", "noopener"); tgPoll(0); } catch (err) { toast(err.message); } return; }
-  if (b.dataset.act === "tgdisc") { if (!confirm("לנתק את הטלגרם?")) return; try { const r = await api("DELETE", "/api/tg/link"); state.connections.telegram = r.link; renderConnections(); toast("נותק"); } catch (err) { toast(err.message); } return; }
   if (b.dataset.act === "gdisc") { try { const r = await api("DELETE", "/api/connect/google"); state.connections = r.connections; renderConnections(); toast("נותק"); } catch (err) { toast(err.message); } }
 });
 

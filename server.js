@@ -69,9 +69,6 @@ const WA_APP_SECRET = process.env.WA_APP_SECRET || "";       // לאימות ח�
 const WA_DISPLAY_NUMBER = process.env.WA_DISPLAY_NUMBER || "";   // המספר להצגה למשתמשים, למשל +972-50-000-0000
 const WA_TEMPLATE_REMINDER = process.env.WA_TEMPLATE_REMINDER || "";   // תבנית מאושרת לתזכורת מחוץ לחלון 24 השעות (פרמטר אחד)
 const CRON_KEY = process.env.CRON_KEY || "";
-/* ---- טלגרם (Bot API) ---- */
-const TG_TOKEN = process.env.TELEGRAM_BOT_TOKEN || "";
-const TG_SECRET = TG_TOKEN ? crypto.createHash("sha256").update("noni-tg:" + TG_TOKEN).digest("hex").slice(0, 48) : "";   // X-Telegram-Bot-Api-Secret-Token
 const CANON_HOST = (process.env.CANONICAL_HOST || "noni.timeline-school.com").toLowerCase();                 // Cloud Scheduler שולח X-Cron-Key
 const SCOPE_URLS = { calendar: "https://www.googleapis.com/auth/calendar.readonly", gmail: "https://www.googleapis.com/auth/gmail.readonly" };
 function vertexHost(r) { return r === "global" ? "aiplatform.googleapis.com" : (r === "eu" || r === "us") ? `aiplatform.${r}.rep.googleapis.com` : `${r}-aiplatform.googleapis.com`; }
@@ -504,9 +501,7 @@ async function connectionsOut(u) {
   const g = r.rows.find(x => x.provider === "google");
   const granted = GOOGLE_SCOPES.filter(sc => g && new RegExp(sc === "gmail" ? "gmail" : "calendar").test(g.scopes || ""));
   const ic = r.rows.find(x => x.provider === "ics");
-  const tg = await pool.query(`SELECT chat_id, username, code, linked_at FROM noni_tg WHERE user_id=$1`, [u.id]).then(x => x.rows[0]).catch(() => null);
   return { ics: { available: !!CONN_KEY, connected: !!ic, label: ic ? ic.account_email : "", error: ic ? ic.last_error : "", since: ic ? ic.updated_at : null },
-    telegram: { available: !!TG_TOKEN, bot: TG_BOT.username || "", linked: !!(tg && tg.linked_at), username: tg ? tg.username : "" },
     google: { available: googleReady(), scopes: GOOGLE_SCOPES, granted, connected: !!g && g.status === "active", email: g ? g.account_email : "", status: g ? g.status : "none", error: g ? g.last_error : "", since: g ? g.updated_at : null } };
 }
 async function googleAccessToken(u) {
@@ -871,33 +866,6 @@ async function waWebhook(req, res) {
   await Promise.all(jobs);   // Cloud Run מקצה CPU רק בזמן הבקשה — מסיימים לפני שעונים
   res.writeHead(200, { "Content-Type": "application/json" }); res.end("{}");
 }
-/* ============================================================
-   טלגרם — Bot API. קישור: בהגדרות לוחצים "חיבור" ← קישור t.me/<bot>?start=<קוד חד-פעמי>
-   ← הבוט מקבל /start <קוד> ← chat_id מקושר למשתמש/ת. אחר כך כל הודעה = שיחה עם נוני (כמו בווטסאפ).
-   ============================================================ */
-const TG_BOT = { username: process.env.TELEGRAM_BOT_USERNAME || "", setup: null };
-async function tgApi(method, body) {
-  const r = await fetch(`https://api.telegram.org/bot${TG_TOKEN}/${method}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body || {}) });
-  const j = await r.json().catch(() => ({}));
-  if (!j.ok) throw new Error("Telegram " + method + ": " + String(j.description || r.status).slice(0, 160));
-  return j.result;
-}
-function tgSetup() {
-  if (!TG_TOKEN) return Promise.resolve();
-  if (!TG_BOT.setup) TG_BOT.setup = (async () => {
-    const me = await tgApi("getMe"); TG_BOT.username = me.username;
-    if (PUBLIC_URL) await tgApi("setWebhook", { url: PUBLIC_URL.replace(/\/+$/, "") + "/api/telegram/webhook", secret_token: TG_SECRET, allowed_updates: ["message"], drop_pending_updates: false });
-    await tgApi("setMyCommands", { commands: [{ command: "start", description: "התחלה / קישור החשבון" }, { command: "help", description: "מה אפשר לבקש מנוני" }] }).catch(() => {});
-  })().catch(e => { console.error("tg setup", e.message); TG_BOT.setup = null; });
-  return TG_BOT.setup;
-}
-const tgSend = (chatId, text) => tgApi("sendMessage", { chat_id: chatId, text: String(text).slice(0, 4000), disable_web_page_preview: true });
-async function tgLinkOut(u) {
-  if (TG_TOKEN && !TG_BOT.username) await tgSetup();
-  const r = await pool.query(`SELECT chat_id, username, code, linked_at FROM noni_tg WHERE user_id=$1`, [u.id]);
-  const t = r.rows[0];
-  return { available: !!TG_TOKEN, bot: TG_BOT.username, linked: !!(t && t.linked_at), username: t ? t.username : "", link: t && t.code && TG_BOT.username ? `https://t.me/${TG_BOT.username}?start=${t.code}` : "" };
-}
 async function channelConversation(u, title) {
   const c = await pool.query(`SELECT id FROM ast_conversation WHERE user_id=$1 AND title=$2 ORDER BY id DESC LIMIT 1`, [u.id, title]);
   if (c.rows[0]) return c.rows[0].id;
@@ -922,63 +890,11 @@ async function channelChat(u, text, channel, title) {
   await log(u.tenant_id, u.email, channel + ".chat", r.used.join(","));
   return r.answer;
 }
-async function tgFileToText(fileId, mime, kind) {
-  const f = await tgApi("getFile", { file_id: fileId }).catch(() => null);
-  if (!f || !f.file_path || (f.file_size || 0) > 20e6) return "";
-  const bin = await fetch(`https://api.telegram.org/file/bot${TG_TOKEN}/${f.file_path}`);
-  if (!bin.ok) return "";
-  const buf = Buffer.from(await bin.arrayBuffer());
-  const prompt = kind === "audio" ? "תמלל/י את ההקלטה במדויק, בשפת הדובר/ת (בדרך כלל עברית). החזר/י רק את התמלול, בלי הקדמות."
-    : "זו תמונה ששלח/ה משתמש/ת לעוזרת אישית. תאר/י בקצרה ובעברית את מה שרלוונטי לפעולה: קבלה — בית העסק, הסכום, התאריך; רשימה/פתק — הפריטים שורה-שורה; הזמנה לאירוע — שם, תאריך, שעה ומקום; אחרת — משפט אחד.";
-  return geminiMedia(prompt, mime, buf);
-}
-async function tgIncoming(m) {
-  const fwd = m.forward_origin || m.forward_from || m.forward_date ? "[הודעה שהועברה] " : "";
-  if (m.text) return fwd + m.text;
-  if (m.voice || m.audio) { const a = m.voice || m.audio; const t = await tgFileToText(a.file_id, a.mime_type || "audio/ogg", "audio"); return t ? "[הודעה קולית] " + t : ""; }
-  if (m.photo && m.photo.length) { const ph = m.photo[m.photo.length - 1]; const t = await tgFileToText(ph.file_id, "image/jpeg", "image"); return fwd + "[תמונה] " + (t || "(לא זוהה תוכן)") + (m.caption ? "\nכיתוב: " + m.caption : ""); }
-  if (m.document && /^(image\/|application\/pdf)/.test(m.document.mime_type || "")) { const t = await tgFileToText(m.document.file_id, m.document.mime_type, "image"); return fwd + "[מסמך] " + (t || "(לא זוהה תוכן)") + (m.caption ? "\nכיתוב: " + m.caption : ""); }
-  if (m.location) return `[מיקום] (${m.location.latitude},${m.location.longitude})`;
-  return "";
-}
-async function tgHandle(m) {
-  const chatId = String(m.chat.id);
-  const text = String(m.text || "");
-  const st = text.match(/^\/start(?:@\w+)?(?:\s+([A-Za-z0-9_-]{6,64}))?\s*$/);
-  if (st && st[1]) {
-    const r = await pool.query(`SELECT user_id FROM noni_tg WHERE code=$1 AND code_at > now() - interval '30 minutes'`, [st[1]]);
-    if (!r.rows[0]) return "הקישור פג או כבר נוצל. אפשר ליצור חדש באתר של נוני: הגדרות ← החיבורים שלי ← טלגרם.";
-    await pool.query(`DELETE FROM noni_tg WHERE chat_id=$1 AND user_id<>$2`, [chatId, r.rows[0].user_id]);
-    await pool.query(`UPDATE noni_tg SET chat_id=$2, username=$3, code=NULL, linked_at=now(), updated_at=now() WHERE user_id=$1`, [r.rows[0].user_id, chatId, str(m.from && (m.from.username || m.from.first_name), 60)]);
-    await log(DEFAULT_TENANT, "tg:" + chatId.slice(-4), "tg.linked", "");
-    return "מעולה, החשבון מקושר 🎉 מעכשיו אפשר פשוט לכתוב לי כאן — למשל \"תזכירי לי מחר ב-8 להתקשר לרופא\". גם התזכורות יגיעו לכאן.";
-  }
-  const link = (await pool.query(`SELECT t.user_id, u.email FROM noni_tg t JOIN ast_user u ON u.id=t.user_id WHERE t.chat_id=$1 AND t.linked_at IS NOT NULL`, [chatId])).rows[0];
-  if (!link) return `היי, כאן נוני. כדי שאוכל לעזור צריך לקשר את הטלגרם לחשבון: נכנסים לאתר${PUBLIC_URL ? " " + PUBLIC_URL : ""}, הגדרות ← החיבורים שלי ← טלגרם ← חיבור.`;
-  if (/^\/(start|help)\b/.test(text)) return "אני כאן 🙂 אפשר לכתוב או להקליט: משימות, תזכורות, רשימת קניות, הוצאות, \"מה יש לי היום\" ותכנון היום.";
-  const u = await resolveUser(link.email);
-  if (!u || u.active === false) return "החשבון אינו פעיל.";
-  const q = await tgIncoming(m);
-  if (!q) return "";
-  return channelChat(u, q, "tg", "טלגרם");
-}
-async function tgWebhook(req, res) {
-  if (!TG_TOKEN || !TG_SECRET || req.headers["x-telegram-bot-api-secret-token"] !== TG_SECRET) { res.writeHead(403); return res.end(); }
-  let raw = ""; for await (const ch of req) { raw += ch; if (raw.length > 200000) break; }
-  let body; try { body = JSON.parse(raw); } catch (e) { res.writeHead(400); return res.end(); }
-  const m = body.message;
-  if (m && m.chat && m.chat.type === "private") {
-    try { tgApi("sendChatAction", { chat_id: m.chat.id, action: "typing" }).catch(() => {}); const reply = await tgHandle(m); if (reply) await tgSend(m.chat.id, reply); }
-    catch (e) { console.error("tg", String(e.message || e).slice(0, 200)); await tgSend(m.chat.id, "משהו השתבש אצלי, אפשר לנסות שוב בעוד רגע?").catch(() => {}); }
-  }
-  res.writeHead(200, { "Content-Type": "application/json" }); res.end("{}");
-}
 /* תזכורות יוצאות — Cloud Scheduler כל דקה: POST /api/cron/reminders עם X-Cron-Key */
 async function cronReminders() {
-  const r = await pool.query(`SELECT r.id, r.text, r.user_id, w.phone, t.chat_id FROM ast_reminder r
+  const r = await pool.query(`SELECT r.id, r.text, r.user_id, w.phone FROM ast_reminder r
                               LEFT JOIN noni_wa w ON w.user_id=r.user_id AND w.verified_at IS NOT NULL
-                              LEFT JOIN noni_tg t ON t.user_id=r.user_id AND t.linked_at IS NOT NULL
-                              WHERE r.status='pending' AND r.remind_at <= now() AND (w.phone IS NOT NULL OR ($1 AND t.chat_id IS NOT NULL)) ORDER BY r.remind_at LIMIT 50`, [!!TG_TOKEN]);
+                              WHERE r.status='pending' AND r.remind_at <= now() AND w.phone IS NOT NULL ORDER BY r.remind_at LIMIT 50`);
   let sent = 0;
   for (const x of r.rows) {
     try {
@@ -988,7 +904,6 @@ async function cronReminders() {
         try { try { await waSend(x.phone, txt); } catch (e) { if (WA_TEMPLATE_REMINDER) await waSendTemplate(x.phone, WA_TEMPLATE_REMINDER, x.text); else throw e; } okAny = true; }   // מחוץ לחלון 24 השעות — תבנית
         catch (e) { lastErr = e; }
       }
-      if (x.chat_id && TG_TOKEN) { try { await tgSend(x.chat_id, "⏰ " + txt); okAny = true; } catch (e) { lastErr = e; } }
       if (!okAny) throw lastErr || new Error("אין ערוץ זמין");
       await pool.query(`UPDATE ast_reminder SET status='sent', sent_at=now() WHERE id=$1`, [x.id]);
       sent++;
@@ -1009,7 +924,7 @@ async function systemPrompt(u) {
   if (u.household_id) lines.push("יש למשתמש/ת משק בית משותף: רשימות, תורנויות והוצאות משותפות לבני הבית."); else lines.push("עדיין אין משק בית משותף; רשימות ותורנויות יהיו אישיות עד שיצורף/תצורף בן/בת זוג (household_info נותן קוד הזמנה).");
   lines.push(`עכשיו: יום ${n.weekday}, ${n.date} ${n.time} (${TZ}). תאריכים יחסיים ("מחר", "יום שלישי") מחושבים מכאן.`);
   if (u.role === "platform_admin") lines.push("המשתמש/ת היא מנהלת הפלטפורמה.");
-  if (u.channel === "wa" || u.channel === "tg") lines.push((u.channel === "tg" ? "הערוץ: טלגרם" : "הערוץ: ווטסאפ") + " — תשובות קצרות במיוחד, בלי עיצוב Markdown (בלי כוכביות וכותרות), אפשר אמוג'י אחד לכל היותר. הודעות שמתחילות ב-[הודעה קולית], [תמונה] או [הודעה שהועברה] הן תוכן שהמשתמש/ת שלח/ה — פעל/י לפי הכוונה: קבלה ← add_expense; רשימה/פתק ← add_list_items או add_task; הזמנה לאירוע ← add_reminder/add_task עם התאריך; ואשר/י בקצרה מה נרשם.");
+  if (u.channel === "wa") lines.push(("הערוץ: ווטסאפ") + " — תשובות קצרות במיוחד, בלי עיצוב Markdown (בלי כוכביות וכותרות), אפשר אמוג'י אחד לכל היותר. הודעות שמתחילות ב-[הודעה קולית], [תמונה] או [הודעה שהועברה] הן תוכן שהמשתמש/ת שלח/ה — פעל/י לפי הכוונה: קבלה ← add_expense; רשימה/פתק ← add_list_items או add_task; הזמנה לאירוע ← add_reminder/add_task עם התאריך; ואשר/י בקצרה מה נרשם.");
   lines.push("");
   lines.push("## כללי הפלטפורמה");
   for (const r of pr.rows) lines.push(`- ${r.title}: ${r.body}`);
@@ -1278,13 +1193,13 @@ const server = http.createServer(async (req, res) => {
   /* בקשות ישירות לכתובות run.app הישנות ← הכתובת הקבועה. דרך ה-Worker יש X-Forwarded-Host (אין לולאה). */
   {
     const fh = String(req.headers["x-forwarded-host"] || "").toLowerCase(), h = String(req.headers.host || "").toLowerCase();
-    if (CANON_HOST && fh !== CANON_HOST && h.endsWith(".run.app") && !/^\/api\/(wa\/webhook|telegram\/webhook|cron\/|health)/.test(p)) {
+    if (CANON_HOST && fh !== CANON_HOST && h.endsWith(".run.app") && !/^\/api\/(wa\/webhook|cron\/|health)/.test(p)) {
       const loc = "https://" + CANON_HOST + req.url;
       res.writeHead(p === "/api/connect/google/callback" ? 302 : 301, { Location: loc, "Cache-Control": "no-store" }); return res.end();
     }
   }
   try {
-    if (p === "/api/health") return json(res, 200, { ok: true, version: VERSION, provider: LLM_PROVIDER, model: LLM_PROVIDER === "gemini" ? GEMINI_MODEL : MODEL, region: LLM_PROVIDER === "gemini" ? GEMINI_REGION : VERTEX_REGION, auth: AUTH_MODE, db: !!process.env.DB_HOST || !!process.env.DB_SOCKET, google: googleReady(), googleScopes: GOOGLE_SCOPES, whatsapp: !!WA_PHONE_ID, telegram: !!TG_TOKEN, ics: true });
+    if (p === "/api/health") return json(res, 200, { ok: true, version: VERSION, provider: LLM_PROVIDER, model: LLM_PROVIDER === "gemini" ? GEMINI_MODEL : MODEL, region: LLM_PROVIDER === "gemini" ? GEMINI_REGION : VERTEX_REGION, auth: AUTH_MODE, db: !!process.env.DB_HOST || !!process.env.DB_SOCKET, google: googleReady(), googleScopes: GOOGLE_SCOPES, whatsapp: !!WA_PHONE_ID, ics: true });
     if (p.startsWith("/l/")) return serveStatic(req, res, "/list.html");
     if (!p.startsWith("/api/")) return serveStatic(req, res, p);
     if (p === "/api/config" && req.method === "GET") return json(res, 200, { ok: true, googleClientId: GOOGLE_CLIENT_ID, auth: AUTH_MODE, whatsapp: !!WA_PHONE_ID, waNumber: WA_DISPLAY_NUMBER });
@@ -1307,7 +1222,6 @@ const server = http.createServer(async (req, res) => {
       res.writeHead(403); return res.end();
     }
     if (p === "/api/wa/webhook" && req.method === "POST") return waWebhook(req, res);
-    if (p === "/api/telegram/webhook" && req.method === "POST") return tgWebhook(req, res);
     if (p === "/api/cron/reminders" && req.method === "POST") {
       if (!CRON_KEY || req.headers["x-cron-key"] !== CRON_KEY) return json(res, 403, { ok: false, error: "forbidden" });
       return json(res, 200, { ok: true, sent: await cronReminders() });
@@ -1437,15 +1351,6 @@ const server = http.createServer(async (req, res) => {
       return json(res, 200, { ok: true, count: evs.length, connections: await connectionsOut(u) });
     }
     if (p === "/api/connect/ics" && req.method === "DELETE") { await pool.query(`DELETE FROM ast_connection WHERE user_id=$1 AND provider='ics'`, [u.id]); icsCache.delete(u.id); await log(u.tenant_id, u.email, "disconnect.ics", ""); return json(res, 200, { ok: true, connections: await connectionsOut(u) }); }
-    if (p === "/api/tg/link" && req.method === "GET") return json(res, 200, { ok: true, link: await tgLinkOut(u) });
-    if (p === "/api/tg/link" && req.method === "POST") {
-      if (!TG_TOKEN) return json(res, 503, { ok: false, error: "החיבור לטלגרם עוד לא הוגדר בשרת." });
-      await tgSetup();
-      const code = crypto.randomBytes(12).toString("base64url");
-      await pool.query(`INSERT INTO noni_tg (user_id, code, code_at) VALUES ($1,$2,now()) ON CONFLICT (user_id) DO UPDATE SET code=$2, code_at=now(), updated_at=now()`, [u.id, code]);
-      return json(res, 200, { ok: true, link: await tgLinkOut(u) });
-    }
-    if (p === "/api/tg/link" && req.method === "DELETE") { await pool.query(`DELETE FROM noni_tg WHERE user_id=$1`, [u.id]); await log(u.tenant_id, u.email, "tg.unlink", ""); return json(res, 200, { ok: true, link: await tgLinkOut(u) }); }
     if (p === "/api/connect/google" && req.method === "DELETE") { await oauthDisconnect(u); return json(res, 200, { ok: true, connections: await connectionsOut(u) }); }
 
     if (p === "/api/prefs" && req.method === "PUT") {
