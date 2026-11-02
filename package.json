@@ -1,0 +1,20 @@
+{
+  "name": "noni",
+  "version": "2026.11.02",
+  "description": "נוני (Noni) — העוזרת האישית לכל אחד: אתר + ווטסאפ (Cloud Run + Cloud SQL, me-west1)",
+  "private": true,
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "AUTH_MODE=none LLM_PROVIDER=mock DB_PORT=5433 node server.js",
+    "test": "node test/smoke.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "google-auth-library": "9.15.1",
+    "jose": "5.9.6",
+    "pg": "8.13.1"
+  }
+}

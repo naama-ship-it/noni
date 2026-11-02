@@ -1,0 +1,1051 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#0b0a0e">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'%3E%3Cpath d='M60 10c28 0 50 20 50 46 0 26-22 46-50 46-6 0-12-1-17-3L18 108l5-22C14 78 10 67 10 56 10 30 32 10 60 10z' fill='%23ff2d9a'/%3E%3Cpath d='M40 76V44l40 32V44' fill='none' stroke='%23fff' stroke-width='9' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Noni">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Noni · נוני, העוזרת האישית שלי">
+<meta property="og:description" content="משימות, תזכורות, רשימת קניות משותפת, תורנויות, הוצאות ותכנון היום — באתר ובווטסאפ. חינם בתקופת הפיילוט.">
+<meta property="og:image" content="__PUBLIC_URL__/og.png">
+<meta property="og:image:width" content="400">
+<meta property="og:image:height" content="400">
+<meta property="og:url" content="__PUBLIC_URL__/">
+<meta name="twitter:card" content="summary">
+<title>Noni · נוני, העוזרת האישית</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700&display=swap">
+<style>
+/* ============================================================
+   נוני — ממשק (גרסה 2026-11-02-06)
+   מערכת העיצוב של נוני (בהשראת עמוד Vibe Coding): רקע כמעט-שחור #0b0a0e, כרטיסים כהים #17151c
+   עם פינות עגולות 22px ומסגרת דקה, ורוד-פוקסיה #ff2d9a לכל הדגשה (כפתורים מלאים = גלולות),
+   כותרות לבנות כבדות, תוויות בוורוד, Heebo. אייקוני קו בלבד. מצב כהה בלבד.
+   © כל הזכויות שמורות לנעמה אורפלי
+   ============================================================ */
+:root{--navy:#ffffff;--navy-soft:#26222c;--green:#3ddc84;--mod:#ff2d9a;--mod-soft:#3a1230;--ink:#f3f1f6;--muted:#a9a3b4;--line:#2d2834;--bg:#0b0a0e;--card:#17151c;--err:#ff6b7a;--warn:#ffb454;--grad:linear-gradient(135deg,#ff2d9a,#b4188f);color-scheme:dark}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{font-family:Heebo,Arial,sans-serif;background:var(--bg);color:var(--ink);display:flex;flex-direction:column;padding-top:env(safe-area-inset-top,0px)}
+button,input,textarea,select{font:inherit}
+header{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--line);background:rgba(11,10,14,.92);backdrop-filter:blur(10px);position:sticky;top:0;z-index:5}
+header h1{font-size:17px;font-weight:700;margin:0;display:flex;align-items:baseline;gap:6px}
+.brand{font-family:Heebo,Arial,sans-serif;font-weight:800;font-size:24px;color:#fff;letter-spacing:-.5px;line-height:1;display:inline-block;unicode-bidi:isolate}
+.brand span{color:var(--mod)}
+.brand.big{font-size:52px;margin-bottom:6px}
+svg.mark{width:30px;height:30px;flex:none}
+.mark.big{display:flex;justify-content:center;margin:4px 0 8px}.mark.big svg{width:84px;height:84px}
+header h1{align-items:center;gap:8px}
+header .who{margin-inline-start:auto;color:var(--muted);font-size:13px;text-align:left;line-height:1.3}
+header .who b{display:block;color:var(--ink);font-weight:500}
+.ibtn{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:50%;width:38px;height:38px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;flex:none}
+.ibtn:hover{background:var(--navy-soft)}
+.ibtn svg{width:20px;height:20px}
+svg.i{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.wrap{max-width:760px;margin:0 auto;padding:14px 14px 90px;width:100%}
+.view{display:none}.view.on{display:block}
+.card{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:16px;margin-bottom:12px;box-shadow:0 0 0 1px rgba(255,45,154,.08),0 12px 30px rgba(0,0,0,.35)}
+.card h2{font-size:16px;font-weight:800;margin:0 0 10px;display:flex;align-items:center;gap:8px;color:#fff}
+.card h2 svg.i{color:var(--mod)}
+.muted{color:var(--muted);font-size:13px}
+.err{color:var(--err);font-size:13px}
+.notice{background:var(--mod-soft);border:1px solid rgba(255,45,154,.35);border-radius:16px;padding:10px 12px;font-size:14px;line-height:1.5;margin-bottom:12px}
+input[type=text],input[type=number],input[type=tel],input[type=date],input[type=time],input[type=email],input[type=password],input[type=datetime-local],textarea,select{width:100%;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 14px;font-size:16px}
+input::placeholder,textarea::placeholder{color:#7d7788}
+textarea{resize:none;line-height:1.45}
+input:focus,textarea:focus,select:focus,button:focus-visible{outline:2px solid var(--mod);outline-offset:1px}
+.btn{border:1px solid var(--line);background:var(--navy-soft);color:var(--ink);border-radius:999px;padding:9px 16px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-weight:500;white-space:nowrap}
+.btn.primary,.btn.mod{background:var(--grad);border-color:transparent;color:#fff;font-weight:700;box-shadow:0 6px 18px rgba(255,45,154,.3)}
+.btn:disabled{opacity:.6;cursor:default}
+.btn.sm{padding:6px 12px;font-size:13px}
+.row{display:flex;gap:8px;align-items:center}
+.row.multi{flex-wrap:wrap}
+.row.multi input[type=date],.row.multi input[type=time],.row.multi input[type=datetime-local],.row.multi select{flex:1 1 120px;width:auto}
+.row.multi .btn{flex:0 0 auto}
+.row > *{min-width:0}
+.grow{flex:1}
+/* ---- שיחה ---- */
+#msgs{display:flex;flex-direction:column;gap:10px;min-height:40vh}
+.msg{max-width:88%;padding:10px 14px;border-radius:18px;line-height:1.55;font-size:15px;white-space:pre-wrap;word-wrap:break-word}
+.msg.user{align-self:flex-start;background:var(--grad);color:#fff;border-bottom-right-radius:4px}
+.msg.bot{align-self:flex-end;background:var(--card);border:1px solid var(--line);border-bottom-left-radius:4px}
+.msg.sys{align-self:center;background:transparent;color:var(--muted);font-size:13px;text-align:center}
+.msg .tools{display:block;margin-top:6px;color:var(--muted);font-size:11.5px}
+.typing{display:inline-flex;gap:4px;align-items:center;height:16px}
+.typing i{width:6px;height:6px;border-radius:50%;background:var(--muted);animation:b 1.2s infinite}
+.typing i:nth-child(2){animation-delay:.2s}.typing i:nth-child(3){animation-delay:.4s}
+@keyframes b{0%,80%,100%{opacity:.25}40%{opacity:1}}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+.chip{border:1px solid var(--line);background:var(--navy-soft);border-radius:999px;padding:6px 12px;font-size:13px;cursor:pointer;color:var(--ink)}
+.chip:hover{border-color:var(--mod);color:var(--mod)}
+.composer{position:fixed;bottom:calc(56px + env(safe-area-inset-bottom,0px));left:0;right:0;background:rgba(11,10,14,.95);border-top:1px solid var(--line);padding:8px 12px;z-index:5}
+.composer .in{max-width:760px;margin:0 auto;display:flex;gap:8px;align-items:flex-end}
+.composer textarea{flex:1;max-height:120px;min-height:44px}
+.composer .send{width:44px;height:44px;border-radius:50%;background:var(--grad);border:0;color:#fff;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;flex:none}
+.composer .send:disabled{opacity:.5}
+.composer .mic{width:44px;height:44px;border-radius:50%;background:var(--card);border:1px solid var(--line);color:var(--ink);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;flex:none;transition:all .2s}
+.composer .mic.rec{background:var(--err);border-color:transparent;color:#fff;animation:pulse 1s infinite}
+.composer .mic.busy{opacity:.6}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(255,107,122,.6)}50%{box-shadow:0 0 0 10px rgba(255,107,122,0)}}
+.recbar{position:fixed;bottom:calc(112px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);background:var(--card);border:1px solid var(--err);color:var(--ink);padding:8px 16px;border-radius:999px;font-size:14px;z-index:7;display:flex;gap:10px;align-items:center}
+.recbar i{width:10px;height:10px;border-radius:50%;background:var(--err);animation:b 1s infinite}
+/* ---- טאבים תחתונים ---- */
+nav.tabs{position:fixed;bottom:0;left:0;right:0;background:rgba(11,10,14,.95);border-top:1px solid var(--line);display:flex;justify-content:space-around;padding:6px 4px calc(6px + env(safe-area-inset-bottom,0px));z-index:6}
+nav.tabs button{position:relative;border:0;background:none;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11.5px;padding:4px 10px;border-radius:10px;cursor:pointer;min-width:62px}
+nav.tabs button svg.i{width:22px;height:22px}
+nav.tabs button.on{color:var(--mod);background:var(--mod-soft)}
+nav.tabs button .dot{position:absolute;top:4px;inset-inline-end:16px;width:8px;height:8px;border-radius:50%;background:var(--err)}
+/* ---- משימות ---- */
+.task{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-top:1px solid var(--line)}
+.task:first-child{border-top:0}
+.task input[type=checkbox]{width:20px;height:20px;margin-top:2px;accent-color:var(--green);flex:none}
+.task .t{flex:1}
+.task .t .ti{font-size:15px}
+.task .t .meta{font-size:12.5px;color:var(--muted);margin-top:2px;display:flex;gap:8px;flex-wrap:wrap}
+.task.done .ti{text-decoration:line-through;color:var(--muted)}
+.pri1{color:var(--err)}.pri3{color:var(--muted)}
+.overdue{color:var(--warn)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:999px;overflow:hidden}
+.seg button{border:0;background:var(--card);padding:6px 12px;cursor:pointer;color:var(--muted);font-size:13px}
+.seg button.on{background:var(--mod);color:#fff;font-weight:700}
+.rem{display:flex;gap:10px;align-items:center;padding:8px 0;border-top:1px solid var(--line);font-size:14px}
+.rem:first-child{border-top:0}
+.rem time{color:var(--muted);font-size:12.5px;white-space:nowrap}
+/* ---- תדריך ---- */
+.brief h3{font-size:14px;margin:12px 0 6px;color:var(--mod)}
+.brief ul{margin:0;padding-inline-start:18px;line-height:1.6}
+.brief .tl{white-space:pre-wrap;line-height:1.6;font-size:14.5px}
+/* ---- ניהול ---- */
+.rule{border:1px solid var(--line);border-radius:16px;padding:10px;margin-bottom:8px;background:var(--bg)}
+.rule .row{margin-bottom:6px}
+.rule select{width:auto}
+.rule textarea{min-height:92px;font-size:14px}
+.rule .title{flex:1 1 120px;width:auto}
+.rule .en-l{flex:none;white-space:nowrap;font-size:13px}
+.rule .rm{flex:none;width:32px;padding:6px 0;justify-content:center}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th,td{text-align:start;padding:7px 6px;border-top:1px solid var(--line)}
+th{color:var(--muted);font-weight:500;border-top:0}
+.pill{display:inline-block;padding:2px 10px;border-radius:999px;font-size:12px;background:var(--navy-soft);color:var(--ink)}
+.pill.mod{background:var(--mod-soft);color:var(--mod)}
+.conn{display:flex;gap:10px;align-items:center;padding:10px 0;border-top:1px solid var(--line)}
+.conn:first-child{border-top:0}
+.conn .ic{width:36px;height:36px;border-radius:50%;background:var(--mod-soft);display:inline-flex;align-items:center;justify-content:center;color:var(--mod);flex:none}
+.conn .t{flex:1;min-width:0}
+.conn .t b{display:block;font-weight:500}
+.conn .t span{font-size:12.5px;color:var(--muted);display:block;overflow:hidden;text-overflow:ellipsis}
+.conn .ok{color:var(--green)}
+.conn.soon .ic{background:var(--navy-soft);color:var(--muted)}
+.conn.soon .t b{color:var(--muted)}
+.toast{position:fixed;bottom:calc(120px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);background:#fff;color:#0b0a0e;padding:10px 16px;border-radius:12px;font-size:14px;z-index:9;opacity:0;transition:opacity .2s;pointer-events:none;max-width:90vw}
+.toast.on{opacity:.95}
+.toast{max-width:calc(100vw - 32px);text-align:center}
+.quick{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}.quick .chip{padding:5px 11px;font-size:12.5px}
+.quick .chip.on{background:var(--mod);color:#fff;border-color:transparent}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+/* ---- הבית: רשימות, תורנויות, הוצאות ---- */
+.item{display:flex;gap:10px;align-items:center;padding:8px 0;border-top:1px solid var(--line);font-size:15px}
+.item:first-child{border-top:0}
+.item input[type=checkbox]{width:20px;height:20px;accent-color:var(--mod);flex:none}
+.item.done .tx{text-decoration:line-through;color:var(--muted)}
+.item .tx{flex:1}
+.item .qty{color:var(--muted);font-size:12.5px}
+.item .by{color:var(--muted);font-size:11.5px}
+.listtabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+.listtabs .chip.on{background:var(--mod);color:#fff;border-color:transparent}
+.chore{display:flex;gap:10px;align-items:center;padding:9px 0;border-top:1px solid var(--line)}
+.chore:first-child{border-top:0}
+.chore .t{flex:1}.chore .t b{display:block;font-weight:500}.chore .t span{font-size:12.5px;color:var(--muted)}
+.chore .turn{color:var(--mod);font-weight:700}
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:4px 0 10px}
+.kpi{background:var(--bg);border:1px solid var(--line);border-radius:16px;padding:10px;text-align:center}
+.kpi b{display:block;font-size:20px;color:#fff}.kpi span{font-size:12px;color:var(--muted)}
+.bar{display:flex;align-items:center;gap:8px;font-size:13px;margin:4px 0}
+.bar .lbl{width:64px;color:var(--muted)}.bar .tr{display:block;flex:1;height:8px;background:var(--navy-soft);border-radius:4px;overflow:hidden}.bar .fl{display:block;height:100%;background:var(--grad)}.bar .v{width:70px;text-align:left;direction:ltr}
+.exp{display:flex;gap:8px;align-items:center;padding:7px 0;border-top:1px solid var(--line);font-size:14px}
+.exp:first-child{border-top:0}
+.exp .amt{font-weight:700;direction:ltr;min-width:70px;text-align:left}.exp .cat{color:var(--mod);font-size:12.5px}.exp .nt{flex:1;color:var(--muted);font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.code{font-size:26px;font-weight:800;letter-spacing:4px;text-align:center;direction:ltr;margin:6px 0;color:#fff}
+.member{display:inline-flex;align-items:center;gap:6px;background:var(--navy-soft);border-radius:999px;padding:4px 10px;font-size:13px;margin:0 0 6px 6px}
+.member.me{border:1px solid var(--mod)}
+.plan{white-space:pre-wrap;line-height:1.6;font-size:14.5px;background:var(--bg);border:1px solid var(--line);border-radius:16px;padding:12px;margin-top:10px}
+/* ---- חלון התקנה (PWA) — בהשראת עמוד Vibe Coding: כרטיס כהה עם הילה ורודה, לוגו בעיגול עם טבעת מנוקדת ---- */
+.sheet{position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);z-index:20;display:flex;align-items:flex-end;justify-content:center;padding:12px;animation:fade .25s}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+.sheet .box{width:100%;max-width:440px;background:var(--card);border:1px solid rgba(255,45,154,.35);border-radius:26px;padding:22px 20px 18px;text-align:center;box-shadow:0 0 0 1px rgba(255,45,154,.15),0 24px 60px rgba(0,0,0,.6),0 0 60px rgba(255,45,154,.18);animation:up .3s cubic-bezier(.2,.8,.2,1)}
+@keyframes up{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}
+.sheet .ring{width:96px;height:96px;border-radius:50%;margin:-54px auto 8px;background:var(--bg);display:flex;align-items:center;justify-content:center;border:3px dotted var(--mod);box-shadow:0 0 0 6px var(--card),0 0 30px rgba(255,45,154,.45)}
+.sheet .ring svg{width:64px;height:64px}
+.sheet h3{margin:6px 0 2px;font-size:22px;font-weight:800;color:#fff}
+.sheet h3 .brand{font-size:28px;vertical-align:-2px;margin-inline-start:6px}
+.sheet p{margin:4px 0;color:var(--muted);font-size:14px;line-height:1.5}
+.sheet p.pink{color:var(--mod);font-weight:700;font-size:14.5px}
+.sheet .acts{display:flex;gap:10px;justify-content:center;margin-top:14px}
+.sheet .acts .btn{padding:11px 22px}
+.sheet .steps{text-align:right;background:var(--bg);border:1px solid var(--line);border-radius:16px;padding:10px 12px;margin-top:10px;font-size:14px;line-height:1.7}
+.sheet .steps svg.i{vertical-align:-4px;color:var(--mod)}
+.sheet .x{position:absolute;margin:-10px 0 0 0;inset-inline-start:14px;border:0;background:none;color:var(--muted);font-size:22px;cursor:pointer}
+.hidden{display:none!important}
+#login{max-width:560px;margin:40px auto;padding:0 16px}
+</style>
+</head>
+<body>
+<header>
+  <h1><svg class="mark" viewBox="0 0 120 120" aria-hidden="true"><defs><linearGradient id="nm" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff2d9a"/><stop offset="1" stop-color="#b4188f"/></linearGradient></defs><path d="M60 10c28 0 50 20 50 46 0 26-22 46-50 46-6 0-12-1-17-3L18 108l5-22C14 78 10 67 10 56 10 30 32 10 60 10z" fill="url(#nm)"/><path d="M40 76V44l40 32V44" fill="none" stroke="#fff" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="brand" dir="ltr">N<span>o</span>ni</span></h1>
+  <div class="who" id="who"></div>
+  <button class="ibtn" id="btnLogout" title="יציאה" aria-label="יציאה"><svg class="i" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg></button>
+</header>
+
+<main>
+<div class="wrap">
+
+  <!-- ===== שיחה ===== -->
+  <section class="view on" id="v-chat">
+    <div class="card hidden" id="loginBox" style="text-align:center;margin-top:24px">
+      <div class="mark big"><svg class="mark" viewBox="0 0 120 120" aria-hidden="true"><defs><linearGradient id="nm2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff2d9a"/><stop offset="1" stop-color="#b4188f"/></linearGradient></defs><path d="M60 10c28 0 50 20 50 46 0 26-22 46-50 46-6 0-12-1-17-3L18 108l5-22C14 78 10 67 10 56 10 30 32 10 60 10z" fill="url(#nm2)"/><path d="M40 76V44l40 32V44" fill="none" stroke="#fff" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="brand big" dir="ltr">N<span>o</span>ni</div>
+      <p style="margin:0 0 4px;font-weight:700">העוזרת האישית שלך — באתר ובווטסאפ</p>
+      <p class="muted" style="margin:0 0 14px">משימות ותזכורות, רשימת קניות משותפת, תורנויות, מעקב הוצאות, יומן ומייל ותכנון היום. שולחים הודעה, קול או צילום קבלה — באתר ובווטסאפ. נכנסים עם חשבון Google, בלי סיסמה.</p>
+      <div id="gsiBtn" style="display:flex;justify-content:center"></div>
+      <p class="muted" style="margin-top:12px;font-size:12px">בהרשמה מאשרים את <a href="/privacy.html">מדיניות הפרטיות</a>. חינם בתקופת הפיילוט.</p>
+      <p class="muted" style="margin-top:6px;font-size:11.5px">© כל הזכויות שמורות לנעמה אורפלי</p>
+    </div>
+    <div id="msgs" role="log" aria-live="polite" aria-label="השיחה עם נוני"></div>
+    <div class="chips" id="chips"></div>
+  </section>
+
+  <!-- ===== משימות ===== -->
+  <section class="view" id="v-tasks">
+    <div class="card">
+      <h2><svg class="i" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>משימה חדשה</h2>
+      <div class="row"><input type="text" id="tTitle" placeholder="מה צריך לעשות?" aria-label="משימה חדשה" enterkeyhint="done"></div>
+      <div class="row multi" style="margin-top:8px">
+        <input type="date" id="tDate" title="תאריך יעד" aria-label="תאריך יעד">
+        <input type="time" id="tTime" title="שעה" aria-label="שעה">
+        <select id="tPri" title="עדיפות" aria-label="עדיפות"><option value="1">עדיפות גבוהה</option><option value="2" selected>עדיפות רגילה</option><option value="3">עדיפות נמוכה</option></select>
+        <button class="btn primary" id="tAdd">הוספה</button>
+      </div>
+      <div class="quick" id="tQuick" aria-label="קיצורי מועד"><button class="chip" data-q="today">היום</button><button class="chip" data-q="tomorrow">מחר</button><button class="chip" data-q="weekend">עד שישי</button><button class="chip" data-q="week">בעוד שבוע</button><button class="chip" data-q="none">בלי תאריך</button></div>
+    </div>
+    <div class="card">
+      <h2><svg class="i" viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13"/><path d="M3 6h.01M3 12h.01M3 18h.01"/></svg>המשימות שלי
+        <span class="seg" style="margin-inline-start:auto"><button data-f="open" class="on">פתוחות</button><button data-f="done">בוצעו</button><button data-f="all">הכול</button></span></h2>
+      <div id="taskList"></div>
+    </div>
+    <div class="card">
+      <h2><svg class="i" viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>תזכורות</h2>
+      <div class="row"><input type="text" id="rText" placeholder="להזכיר לי…" aria-label="טקסט התזכורת"></div>
+      <div class="row multi" style="margin-top:8px"><input type="datetime-local" id="rWhen" aria-label="מועד התזכורת"><button class="btn primary" id="rAdd">קביעה</button></div>
+      <div class="quick" id="rQuick" aria-label="קיצורי מועד"><button class="chip" data-q="20m">בעוד 20 דק׳</button><button class="chip" data-q="1h">בעוד שעה</button><button class="chip" data-q="eve">הערב ב-20:00</button><button class="chip" data-q="morn">מחר ב-8:00</button></div>
+      <div id="remList" style="margin-top:8px"></div>
+    </div>
+  </section>
+
+  <!-- ===== תדריך ===== -->
+  <section class="view" id="v-brief">
+    <div class="card brief">
+      <h2><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>תדריך היום <span class="muted" id="briefDate" style="margin-inline-start:auto;font-weight:400"></span></h2>
+      <p class="muted" id="briefHint">היומן של היום (אם חובר), המשימות שמועדן היום או שעבר, והתזכורות הקרובות.</p>
+      <div class="row multi"><button class="btn mod" id="briefGo"><svg class="i" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-6.2-8.6"/><path d="M21 3v6h-6"/></svg>הפקת תדריך</button><button class="btn" id="planGo"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/><path d="M8 14h3M13 14h3"/></svg>תכנון היום</button></div>
+      <div id="briefOut"></div>
+    </div>
+    <div class="card hidden" id="planCard">
+      <h2><svg class="i" viewBox="0 0 24 24"><path d="M12 8v4l3 2"/><circle cx="12" cy="12" r="9"/></svg>התוכנית להיום <span class="muted" id="planDate" style="margin-inline-start:auto;font-weight:400"></span></h2>
+      <p class="muted">נוני מסדרת את היום לפי היומן, המשימות והתזכורות. השתנה משהו? כתבי מה, והיא תסדר מחדש.</p>
+      <div class="plan" id="planOut"></div>
+      <div class="row" style="margin-top:10px"><input type="text" id="planNote" placeholder="מה השתנה? למשל: נכנסה פגישה דחופה ב-11"><button class="btn sm primary" id="planRedo">לתכנן מחדש</button></div>
+    </div>
+  </section>
+
+  <!-- ===== הבית: רשימות משותפות, תורנויות, הוצאות ===== -->
+  <section class="view" id="v-home">
+    <div class="card">
+      <h2><svg class="i" viewBox="0 0 24 24"><path d="M6 6h15l-1.5 8h-12z"/><path d="M6 6L5 3H2"/><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/></svg>רשימות משותפות <span class="muted" id="listsWho" style="margin-inline-start:auto;font-weight:400"></span></h2>
+      <div class="listtabs" id="listTabs"></div>
+      <div class="row"><input type="text" id="liText" aria-label="פריט חדש לרשימה" placeholder="מה להוסיף? אפשר כמה, מופרדים בפסיק"><button class="btn primary" id="liAdd">הוספה</button></div>
+      <div id="listItems" style="margin-top:8px"></div>
+      <div class="row multi" style="margin-top:8px"><button class="btn sm primary" id="liShare"><svg class="i" viewBox="0 0 24 24"><path d="M21 11.5a8.4 8.4 0 0 1-12.3 7.5L3 21l2-5.6A8.5 8.5 0 1 1 21 11.5z"/></svg>שיתוף בווטסאפ</button><button class="btn sm" id="liClear">ניקוי המסומנים</button><button class="btn sm" id="liNew">+ רשימה חדשה</button><button class="btn sm hidden" id="liDel">מחיקת הרשימה</button></div>
+      <p class="muted" id="liShareInfo" style="margin:6px 0 0;font-size:12px"></p>
+    </div>
+    <div class="card">
+      <h2><svg class="i" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-9-9"/><path d="M21 3v6h-6"/><path d="M12 7v5l3 2"/></svg>תורנויות</h2>
+      <div id="choreList"></div>
+      <div class="row" style="margin-top:10px"><input type="text" id="chTitle" placeholder="מה? למשל: להוציא זבל"></div>
+      <div class="row multi" style="margin-top:8px"><input type="text" id="chPeople" placeholder="מי? דנה, יוסי" style="flex:2 1 140px;width:auto"><select id="chCad"><option value="weekly">שבועי</option><option value="daily">יומי</option><option value="once">חד-פעמי</option></select><button class="btn primary" id="chAdd">הוספה</button></div>
+    </div>
+    <div class="card">
+      <h2><svg class="i" viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="13" rx="2"/><path d="M2 10h20"/><path d="M6 15h4"/></svg>הוצאות <span class="muted" id="expWho" style="margin-inline-start:auto;font-weight:400"></span></h2>
+      <div class="kpis" id="expKpis"></div>
+      <div id="expCats"></div>
+      <div class="row multi" style="margin-top:10px"><input type="number" inputmode="decimal" id="exAmt" placeholder="סכום ₪" min="0" step="0.01" aria-label="סכום" style="flex:1 1 100px;width:auto"><select id="exCat" aria-label="קטגוריה"></select></div>
+      <div class="row" style="margin-top:8px"><input type="text" id="exNote" placeholder="על מה? (סופר, דלק…)"><button class="btn primary" id="exAdd">רישום</button></div>
+      <div id="expList" style="margin-top:8px"></div>
+    </div>
+    <div class="card" id="hhCard">
+      <h2><svg class="i" viewBox="0 0 24 24"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/></svg>בני הבית</h2>
+      <div id="hhBody"></div>
+    </div>
+  </section>
+
+  <!-- ===== הגדרות / ניהול ===== -->
+  <section class="view" id="v-settings">
+    <div class="card">
+      <h2><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>הפרופיל שלי</h2>
+      <div class="row"><label class="muted" style="width:90px">שם לתצוגה</label><input type="text" id="pName"></div>
+      <div class="row" style="margin-top:8px"><label class="muted" style="width:90px">כינוי לעוזר/ת</label><input type="text" id="pNick" placeholder="למשל: נוני"></div>
+      <div class="row" style="margin-top:8px"><label class="muted" style="width:90px">סגנון</label><input type="text" id="pStyle" placeholder="למשל: קצר ותכליתי"></div>
+      <div class="row" style="margin-top:10px"><button class="btn primary" id="pSave">שמירה</button><span class="muted" id="pInfo"></span></div>
+    </div>
+    <div class="card" id="connCard">
+      <h2><svg class="i" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg>החיבורים שלי</h2>
+      <p class="muted">כל חיבור הוא שלך בלבד: העוזר/ת משתמש/ת בו רק כדי לענות לך, ואפשר לנתק בכל רגע.</p>
+      <div id="connList"></div>
+    </div>
+    <div class="card" id="waCard">
+      <h2><svg class="i" viewBox="0 0 24 24"><path d="M21 11.5a8.4 8.4 0 0 1-12.3 7.5L3 21l2-5.6A8.5 8.5 0 1 1 21 11.5z"/></svg>ווטסאפ</h2>
+      <div id="waBody"></div>
+    </div>
+    <div class="card" id="adminUsers" style="display:none">
+      <h2><svg class="i" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2 20a7 7 0 0 1 14 0"/><circle cx="17" cy="9" r="2.5"/><path d="M16 14.5a5 5 0 0 1 6 5.5"/></svg>משתמשים <span class="muted" id="seatsInfo" style="margin-inline-start:auto;font-weight:400"></span></h2>
+      <div style="overflow-x:auto;margin-top:8px"><table id="usersTable"></table></div>
+    </div>
+    <div class="card" id="adminPlatform" style="display:none">
+      <h2><svg class="i" viewBox="0 0 24 24"><path d="M12 2l2.4 4.9 5.4.8-3.9 3.8.9 5.4-4.8-2.5-4.8 2.5.9-5.4L4.2 7.7l5.4-.8z"/></svg>כללי הפלטפורמה <span class="pill mod" style="margin-inline-start:auto">מנהלת הפלטפורמה</span></h2>
+      <p class="muted">השכבה של "המומחית": כל שינוי כאן מגיע לכל המשתמשים מיד. סוגים: כלל · יכולת (skill) · אוטומציה.</p>
+      <div id="platformRules"></div>
+      <div class="row"><button class="btn sm" id="platformAddRule">+ כלל</button><button class="btn sm primary" id="platformSaveRules">שמירה</button></div>
+    </div>
+    <div class="card" id="installCard">
+      <h2><svg class="i" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/><path d="M9 8l3 3 3-3M12 11V5"/></svg>נוני כאפליקציה</h2>
+      <p class="muted">מתקינים פעם אחת ונוני נפתחת מהמסך הראשי, עם האייקון שלה, בלי דפדפן.</p>
+      <button class="btn primary" id="installBtn">התקנה על המסך הראשי</button>
+    </div>
+    <p class="muted" id="verInfo" style="text-align:center"></p>
+    <p class="muted" style="text-align:center;font-size:12px;margin-top:-6px">נוני · <a href="/privacy.html" style="color:var(--mod);text-decoration:none">מדיניות הפרטיות</a> · © כל הזכויות שמורות לנעמה אורפלי</p>
+  </section>
+
+</div>
+</main>
+
+<div class="composer" id="composer">
+  <div class="in">
+    <button class="mic" id="mic" aria-label="הקלטה" title="הקלטה — נוני תבין לאן זה הולך"><svg class="i" viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><path d="M12 17v4M8 21h8"/></svg></button>
+    <textarea id="input" rows="1" placeholder="מה צריך? כתבי או הקליטי…" enterkeyhint="send" aria-label="הודעה"></textarea>
+    <button class="send" id="send" aria-label="שליחה"><svg class="i" viewBox="0 0 24 24" style="transform:scaleX(-1)"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4z"/></svg></button>
+  </div>
+</div>
+
+<nav class="tabs" aria-label="ניווט ראשי">
+  <button data-v="chat" class="on"><svg class="i" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>שיחה</button>
+  <button data-v="tasks"><svg class="i" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>משימות<span class="dot hidden" id="dotTasks"></span></button>
+  <button data-v="home"><svg class="i" viewBox="0 0 24 24"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/></svg>הבית</button>
+  <button data-v="brief"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>תדריך</button>
+  <button data-v="settings"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>הגדרות</button>
+</nav>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<div class="recbar hidden" id="recbar"><i></i><span id="recTime">0:00</span><span>מקליטה… לחצו שוב לסיום</span></div>
+<div class="sheet hidden" id="installSheet" role="dialog" aria-modal="true" aria-labelledby="installTitle">
+  <div class="box">
+    <button class="x" id="installClose" aria-label="סגירה">×</button>
+    <div class="ring"><svg viewBox="0 0 120 120" aria-hidden="true"><defs><linearGradient id="nm3" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff2d9a"/><stop offset="1" stop-color="#b4188f"/></linearGradient></defs><path d="M60 10c28 0 50 20 50 46 0 26-22 46-50 46-6 0-12-1-17-3L18 108l5-22C14 78 10 67 10 56 10 30 32 10 60 10z" fill="url(#nm3)"/><path d="M40 76V44l40 32V44" fill="none" stroke="#fff" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    <h3 id="installTitle">להתקין את <span class="brand" dir="ltr">N<span>o</span>ni</span></h3>
+    <p class="pink">העוזרת האישית שלך — על המסך הראשי</p>
+    <p>נפתחת כמו אפליקציה, בלי דפדפן וסרגלים, עם האייקון של נוני. לא תופסת מקום ולא צריך חנות אפליקציות.</p>
+    <div class="steps hidden" id="installSteps"></div>
+    <div class="acts"><button class="btn primary" id="installGo">התקנה</button><button class="btn" id="installLater">לא עכשיו</button></div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   מצב דמו: window.ASSIST_DEMO=true (מוזרק בבנייה), או ?demo=1, או אתר tiiny.
+   במצב דמו אין שרת: הנתונים פיקטיביים ונשמרים בזיכרון הדף בלבד.
+   ============================================================ */
+const DEMO = !!(window.ASSIST_DEMO || /[?&]demo=1/.test(location.search) || /tiiny\.(co|site|host)$/.test(location.hostname));
+const $ = s => document.querySelector(s);
+const esc = s => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const state = { me: null, tasks: [], reminders: [], convId: null, filter: "open", left: null, sending: false, prefs: {}, now: null, connections: null, household: null, lists: [], chores: [], expenses: null, categories: [], curList: "" };
+
+/* ---------- שכבת API: שרת אמיתי או שכבת דמו ---------- */
+async function api(method, path, body) {
+  if (DEMO) return demoApi(method, path, body);
+  const r = await fetch(path, { method, headers: { "Content-Type": "application/json" }, body: body ? JSON.stringify(body) : undefined, credentials: "same-origin" });
+  const j = await r.json().catch(() => ({ ok: false, error: "תשובה לא תקינה מהשרת (" + r.status + ")" }));
+  if (!j.ok) { const e = new Error(j.error || ("שגיאה " + r.status)); if (j.login || r.status === 401) e.login = true; throw e; }
+  return j;
+}
+
+/* ---------- טוסט ---------- */
+let toastT;
+function toast(t) { const el = $("#toast"); el.textContent = t; el.classList.add("on"); clearTimeout(toastT); toastT = setTimeout(() => el.classList.remove("on"), 2600); }
+
+/* ---------- ניווט ---------- */
+function show(v) {
+  document.querySelectorAll(".view").forEach(x => x.classList.toggle("on", x.id === "v-" + v));
+  document.querySelectorAll("nav.tabs button").forEach(b => { b.classList.toggle("on", b.dataset.v === v); if (b.dataset.v === v) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current"); });
+  window.scrollTo(0, 0);
+  $("#composer").classList.toggle("hidden", v !== "chat");
+  if (v === "chat") setTimeout(() => $("#msgs").lastElementChild && $("#msgs").lastElementChild.scrollIntoView({ block: "end" }), 30);
+  if (v === "settings") loadAdmin();
+}
+document.querySelectorAll("nav.tabs button").forEach(b => b.onclick = () => show(b.dataset.v));
+
+/* ---------- שיחה ---------- */
+function addMsg(role, text, tools) {
+  const d = document.createElement("div");
+  d.className = "msg " + role;
+  d.textContent = text;
+  if (tools && tools.length) { const s = document.createElement("span"); s.className = "tools"; s.textContent = "כלים: " + tools.map(toolHe).join(" · "); d.appendChild(s); }
+  $("#msgs").appendChild(d);
+  d.scrollIntoView({ block: "end", behavior: "smooth" });
+  return d;
+}
+const toolHe = n => ({ now: "שעון", list_calendar_events: "יומן", search_email: "מייל", read_email: "קריאת מייל", list_tasks: "משימות", add_task: "הוספת משימה", update_task: "עדכון משימה", list_reminders: "תזכורות", add_reminder: "תזכורת", cancel_reminder: "ביטול תזכורת", list_items: "רשימה", add_list_items: "הוספה לרשימה", check_list_items: "סימון ברשימה", clear_done_items: "ניקוי רשימה", list_chores: "תורנויות", add_chore: "תורנות", chore_done: "תורנות בוצעה", household_info: "בני הבית", add_expense: "הוצאה", list_expenses: "הוצאות", expense_summary: "סיכום הוצאות", plan_day: "תכנון היום" }[n] || n);
+function typing() { const d = document.createElement("div"); d.className = "msg bot"; d.innerHTML = '<span class="typing"><i></i><i></i><i></i></span>'; $("#msgs").appendChild(d); d.scrollIntoView({ block: "end" }); return d; }
+async function send(text) {
+  text = (text || $("#input").value).trim();
+  if (!text || state.sending) return;
+  state.sending = true; $("#send").disabled = true;
+  $("#input").value = ""; autosize();
+  addMsg("user", text.replace(/^\[הודעה קולית\]\s*/, "🎤 "));
+  const t = typing();
+  try {
+    const r = await api("POST", "/api/chat", { message: text, conversationId: state.convId });
+    state.convId = r.conversationId; state.left = r.left;
+    t.remove(); addMsg("bot", r.answer, r.tools);
+    if (r.tasks) { state.tasks = r.tasks; renderTasks(); }
+    if (r.reminders) { state.reminders = r.reminders; renderReminders(); }
+    if (r.lists) { state.lists = r.lists; renderLists(); }
+    if (r.chores) { state.chores = r.chores; renderChores(); }
+    if (r.expenses) { state.expenses = r.expenses; renderExpenses(); }
+    if (/חיבור גוגל|חיבורים/.test(r.answer) && state.connections && !state.connections.google.connected) addMsg("sys", "אפשר לחבר את גוגל במסך ההגדרות ← החיבורים שלי.");
+  } catch (e) { t.remove(); addMsg("sys", "לא הצלחתי לשלוח: " + e.message); }
+  state.sending = false; $("#send").disabled = false; $("#input").focus();
+}
+$("#send").onclick = () => send();
+$("#input").addEventListener("keydown", e => { if (e.key === "Enter" && !e.shiftKey && !e.isComposing) { e.preventDefault(); send(); } });
+function autosize() { const el = $("#input"); el.style.height = "auto"; el.style.height = Math.min(120, el.scrollHeight) + "px"; }
+$("#input").addEventListener("input", autosize);
+const CHIPS = ["מה יש לי היום?", "תוסיפי לקניות חלב, לחם וביצים", "שילמתי 120 בסופר", "תזכירי לי מחר ב-8 להתקשר לרופא", "תכנני לי את היום", "מי בתור להוציא זבל?", "כמה הוצאתי החודש?"];
+$("#chips").innerHTML = CHIPS.map(c => `<button class="chip">${esc(c)}</button>`).join("");
+$("#chips").querySelectorAll(".chip").forEach(c => c.onclick = () => send(c.textContent));
+
+/* ---------- כניסה עם Google ---------- */
+let CFG = null;
+async function loadConfig() { try { CFG = await api("GET", "/api/config"); } catch (e) { CFG = {}; } }
+function showLogin() {
+  $("#loginBox").classList.remove("hidden"); $("#composer").classList.add("hidden"); $("#chips").innerHTML = ""; document.querySelector("nav.tabs").classList.add("hidden"); $("#btnLogout").classList.add("hidden"); $("#who").innerHTML = "";
+  if (!CFG || !CFG.googleClientId) { $("#gsiBtn").innerHTML = `<p class="muted">הכניסה עם Google עדיין לא הוגדרה בשרת (GOOGLE_CLIENT_ID).</p>`; return; }
+  const sc = document.createElement("script"); sc.src = "https://accounts.google.com/gsi/client"; sc.async = true;
+  sc.onload = () => {
+    google.accounts.id.initialize({ client_id: CFG.googleClientId, callback: async resp => {
+      try { await api("POST", "/api/auth/google", { credential: resp.credential }); $("#loginBox").classList.add("hidden"); $("#composer").classList.remove("hidden"); document.querySelector("nav.tabs").classList.remove("hidden"); $("#btnLogout").classList.remove("hidden"); boot(); }
+      catch (e) { toast(e.message); }
+    }, ux_mode: "popup", auto_select: false });
+    google.accounts.id.renderButton($("#gsiBtn"), { theme: "outline", size: "large", shape: "pill", text: "continue_with", locale: "he", width: 280 });
+  };
+  document.head.appendChild(sc);
+}
+$("#btnLogout").onclick = async () => { try { await api("POST", "/api/auth/logout"); } catch (e) {} location.reload(); };
+
+/* ---------- משימות ---------- */
+const fmtD = s => { if (!s) return ""; const [y, m, d] = s.split("-"); return `${d}.${m}.${y.slice(2)}`; };
+const localISO = d => new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Jerusalem", year: "numeric", month: "2-digit", day: "2-digit" }).format(d);
+const todayISO = () => localISO(new Date());
+function renderTasks() {
+  const f = state.filter;
+  const list = state.tasks.filter(t => f === "all" ? true : f === "done" ? t.status === "done" : t.status === "open");
+  const today = todayISO();
+  $("#taskList").innerHTML = list.length ? list.map(t => `
+    <div class="task ${t.status === "done" ? "done" : ""}" data-id="${t.id}">
+      <input type="checkbox" ${t.status === "done" ? "checked" : ""} aria-label="בוצע">
+      <div class="t"><div class="ti ${t.priority === 1 ? "pri1" : ""}">${esc(t.title)}</div>
+        <div class="meta">${t.dueDate ? `<span class="${t.status === "open" && t.dueDate < today ? "overdue" : ""}">עד ${fmtD(t.dueDate)}${t.dueTime ? " " + t.dueTime : ""}</span>` : ""}${t.priority === 1 ? "<span class='pri1'>עדיפות גבוהה</span>" : t.priority === 3 ? "<span class='pri3'>עדיפות נמוכה</span>" : ""}${t.notes ? `<span>${esc(t.notes)}</span>` : ""}</div></div>
+      <button class="btn sm" data-act="drop" title="הסרה">הסרה</button>
+    </div>`).join("") : `<p class="muted">${f === "open" ? "אין משימות פתוחות." : "אין משימות להצגה."}</p>`;
+  const open = state.tasks.filter(t => t.status === "open" && t.dueDate && t.dueDate <= today).length;
+  $("#dotTasks").classList.toggle("hidden", !open);
+}
+$("#taskList").addEventListener("change", async e => {
+  const row = e.target.closest(".task"); if (!row || e.target.type !== "checkbox") return;
+  try { const r = await api("PATCH", "/api/tasks/" + row.dataset.id, { status: e.target.checked ? "done" : "open" }); state.tasks = r.tasks; renderTasks(); } catch (err) { toast(err.message); }
+});
+$("#taskList").addEventListener("click", async e => {
+  const b = e.target.closest("button[data-act=drop]"); if (!b) return;
+  const row = b.closest(".task");
+  try { const r = await api("PATCH", "/api/tasks/" + row.dataset.id, { status: "dropped" }); state.tasks = r.tasks; renderTasks(); toast("המשימה הוסרה"); } catch (err) { toast(err.message); }
+});
+document.querySelectorAll(".seg button").forEach(b => b.onclick = () => { document.querySelectorAll(".seg button").forEach(x => { x.classList.toggle("on", x === b); x.setAttribute("aria-pressed", String(x === b)); }); state.filter = b.dataset.f; renderTasks(); });
+$("#tAdd").onclick = async () => {
+  const title = $("#tTitle").value.trim(); if (!title) return $("#tTitle").focus();
+  const btn = $("#tAdd"); btn.disabled = true; const old = btn.textContent; btn.textContent = "שומר…";
+  try { const r = await api("POST", "/api/tasks", { title, dueDate: $("#tDate").value, dueTime: $("#tTime").value, priority: Number($("#tPri").value) }); state.tasks = r.tasks; renderTasks(); $("#tTitle").value = ""; $("#tDate").value = ""; $("#tTime").value = ""; markQuick($("#tQuick"), null); toast("המשימה נוספה"); }
+  catch (e) { toast(e.message); } finally { btn.disabled = false; btn.textContent = old; }
+};
+$("#tTitle").addEventListener("keydown", e => { if (e.key === "Enter" && !e.isComposing) $("#tAdd").click(); });
+
+/* ---------- קיצורי מועד (חדש): בוחרים "היום/מחר/בעוד שעה" בלחיצה במקום בוררי תאריך ---------- */
+const pad2 = n => String(n).padStart(2, "0");
+const localDT = d => `${localISO(d)}T${new Intl.DateTimeFormat("en-GB", { timeZone: "Asia/Jerusalem", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(d)}`;
+const plusDays = n => localISO(new Date(Date.now() + n * 86400e3));
+function markQuick(box, b) { box.querySelectorAll(".chip").forEach(x => { x.classList.toggle("on", x === b); x.setAttribute("aria-pressed", String(x === b)); }); }
+$("#tQuick").addEventListener("click", e => {
+  const b = e.target.closest(".chip"); if (!b) return; const q = b.dataset.q;
+  const dow = new Date(todayISO() + "T12:00:00Z").getUTCDay();
+  $("#tDate").value = q === "today" ? todayISO() : q === "tomorrow" ? plusDays(1) : q === "weekend" ? plusDays((5 - dow + 7) % 7) : q === "week" ? plusDays(7) : "";
+  if (q === "none") $("#tTime").value = "";
+  markQuick($("#tQuick"), b); $("#tTitle").focus();
+});
+$("#rQuick").addEventListener("click", e => {
+  const b = e.target.closest(".chip"); if (!b) return; const q = b.dataset.q; let v;
+  if (q === "20m") v = localDT(new Date(Date.now() + 20 * 60e3));
+  else if (q === "1h") v = localDT(new Date(Date.now() + 3600e3));
+  else if (q === "eve") { v = todayISO() + "T20:00"; if (new Date(v) <= new Date()) v = plusDays(1) + "T20:00"; }
+  else v = plusDays(1) + "T08:00";
+  $("#rWhen").value = v; markQuick($("#rQuick"), b);
+  if (!$("#rText").value.trim()) $("#rText").focus();
+});
+["tDate", "tTime"].forEach(id => $("#" + id).addEventListener("input", () => markQuick($("#tQuick"), null)));
+$("#rWhen").addEventListener("input", () => markQuick($("#rQuick"), null));
+$("#rText").addEventListener("keydown", e => { if (e.key === "Enter" && !e.isComposing) $("#rAdd").click(); });
+
+/* ---------- תזכורות ---------- */
+const fmtDT = iso => { const d = new Date(iso), o = { timeZone: "Asia/Jerusalem" }; const day = localISO(d), t = todayISO(), tm = localISO(new Date(Date.now() + 86400e3)); const hm = d.toLocaleTimeString("he-IL", Object.assign({ hour: "2-digit", minute: "2-digit" }, o)); return (day === t ? "היום" : day === tm ? "מחר" : d.toLocaleDateString("he-IL", Object.assign({ day: "2-digit", month: "2-digit" }, o))) + " ב-" + hm; };
+function renderReminders() {
+  $("#remList").innerHTML = state.reminders.length ? state.reminders.map(r => `<div class="rem" data-id="${r.id}"><svg class="i" viewBox="0 0 24 24" style="color:var(--mod)"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5"/><path d="M5 3L2 6M19 3l3 3"/></svg><span class="grow">${esc(r.text)}</span><time>${fmtDT(r.remindAt)}</time><button class="btn sm" data-act="cancel">ביטול</button></div>`).join("") : `<p class="muted">אין תזכורות ממתינות.</p>`;
+}
+$("#remList").addEventListener("click", async e => {
+  const b = e.target.closest("button[data-act=cancel]"); if (!b) return;
+  try { const r = await api("DELETE", "/api/reminders/" + b.closest(".rem").dataset.id); state.reminders = r.reminders; renderReminders(); } catch (err) { toast(err.message); }
+});
+$("#rAdd").onclick = async () => {
+  const text = $("#rText").value.trim(), when = $("#rWhen").value; if (!text || !when) return toast("צריך גם טקסט וגם מועד"); if (new Date(when) <= new Date()) return toast("המועד כבר עבר — בחרי מועד עתידי");
+  try { const r = await api("POST", "/api/reminders", { text, remindAt: new Date(when).toISOString() }); state.reminders = r.reminders; renderReminders(); $("#rText").value = ""; $("#rWhen").value = ""; $("#rQuick").querySelectorAll(".chip").forEach(x => x.classList.remove("on")); toast("התזכורת נקבעה"); } catch (e) { toast(e.message); }
+};
+async function pollDue() {
+  if (!state.me) return;
+  try { const r = await api("POST", "/api/reminders/due", {}); if (r.due && r.due.length) { r.due.forEach(d => { addMsg("sys", "תזכורת: " + d.text); toast("תזכורת: " + d.text); }); state.reminders = r.reminders; renderReminders(); } } catch (e) {}
+}
+setInterval(pollDue, 60000);
+
+/* ---------- תדריך ---------- */
+$("#briefGo").onclick = async () => {
+  const b = $("#briefGo"); b.disabled = true; const old = b.innerHTML; b.textContent = "מכין…";
+  try {
+    const r = await api("POST", "/api/brief", {});
+    const today = r.now.date;
+    let h = "";
+    if (r.calendar) h += `<h3>היומן האישי</h3>` + (r.calendar.error ? `<p class="muted">${esc(r.calendar.error)}</p>` : r.calendar.length ? `<ul>${r.calendar.map(e => `<li>${esc(e.start)} — ${esc(e.title)}${e.location ? " · " + esc(e.location) : ""}</li>`).join("")}</ul>` : `<p class="muted">אין אירועים ביומן היום.</p>`);
+    h += `<h3>משימות להיום${r.tasks.some(t => t.dueDate < today) ? " (כולל שעבר מועדן)" : ""}</h3>` + (r.tasks.length ? `<ul>${r.tasks.map(t => `<li>${esc(t.title)}${t.dueDate && t.dueDate < today ? ` <span class="overdue">(מ-${fmtD(t.dueDate)})</span>` : ""}${t.dueTime ? " · " + t.dueTime : ""}</li>`).join("")}</ul>` : `<p class="muted">אין משימות להיום.</p>`);
+    h += `<h3>תזכורות קרובות</h3>` + (r.reminders.length ? `<ul>${r.reminders.map(x => `<li>${esc(x.text)} · ${fmtDT(x.remindAt)}</li>`).join("")}</ul>` : `<p class="muted">אין תזכורות ב-36 השעות הקרובות.</p>`);
+    if (r.mail) h += `<h3>מיילים שמחכים</h3>` + (r.mail.error === "needs-gmail-scope" ? `<p class="muted">כדי לראות מיילים חשובים בתדריך צריך לחבר מחדש את גוגל ולאשר גישה למייל (הגדרות ← החיבורים שלי).</p>` : r.mail.error ? `<p class="muted">${esc(r.mail.error)}</p>` : r.mail.length ? `<ul>${r.mail.map(m => `<li>${esc(m.subject)} <span class="muted">· ${esc(String(m.from).replace(/<.*>/, "").trim())}</span></li>`).join("")}</ul>` : `<p class="muted">אין מיילים חדשים שדורשים תשומת לב.</p>`);
+    if (r.chores && r.chores.length) h += `<h3>תורנויות להיום</h3><ul>${r.chores.map(c => `<li>${esc(c.title)} — <b>${esc(c.turn)}</b></li>`).join("")}</ul>`;
+    if (r.expenses || r.shopping) h += `<h3>הבית</h3><ul>${r.shopping ? `<li>${r.shopping} פריטים ברשימת הקניות</li>` : ""}${r.expenses ? `<li>הוצאות: השבוע ${fmtILS(r.expenses.week)} · החודש ${fmtILS(r.expenses.month)}</li>` : ""}</ul>`;
+    $("#briefOut").innerHTML = h;
+    $("#briefDate").textContent = `יום ${r.now.weekday}, ${fmtD(r.now.date)}`;
+  } catch (e) { toast(e.message); } finally { b.disabled = false; b.innerHTML = old; }
+};
+
+/* ---------- תכנון היום ---------- */
+const fmtILS = n => new Intl.NumberFormat("he-IL", { style: "currency", currency: "ILS", maximumFractionDigits: 0 }).format(Number(n) || 0);
+async function makePlan(note) {
+  const b = $("#planGo"); b.disabled = true; $("#planRedo").disabled = true;
+  $("#planCard").classList.remove("hidden"); $("#planOut").innerHTML = '<span class="typing"><i></i><i></i><i></i></span>';
+  try { const r = await api("POST", "/api/plan", { note }); $("#planOut").textContent = r.plan; $("#planDate").textContent = fmtD(r.date); $("#planNote").value = ""; $("#planCard").scrollIntoView({ block: "start", behavior: "smooth" }); }
+  catch (e) { $("#planOut").textContent = ""; toast(e.message); }
+  finally { b.disabled = false; $("#planRedo").disabled = false; }
+}
+$("#planGo").onclick = () => makePlan("");
+$("#planRedo").onclick = () => makePlan($("#planNote").value.trim());
+async function loadPlan() { try { const r = await api("GET", "/api/plan"); if (r.plan) { $("#planCard").classList.remove("hidden"); $("#planOut").textContent = r.plan; $("#planDate").textContent = fmtD(r.date); } } catch (e) {} }
+
+/* ---------- הבית: רשימות ---------- */
+function curList() { return state.lists.find(l => l.name === state.curList) || state.lists[0] || null; }
+function renderLists() {
+  const hh = state.household;
+  $("#listsWho").textContent = hh && hh.exists && hh.members.length > 1 ? `משותף עם ${hh.members.filter(m => !m.me).map(m => m.name).join(", ")}` : "";
+  if (!state.lists.length) state.lists = [{ name: "קניות", kind: "shopping", items: [], virtual: true }];
+  if (!state.curList || !state.lists.some(l => l.name === state.curList)) state.curList = state.lists[0].name;
+  $("#listTabs").innerHTML = state.lists.map(l => `<button class="chip ${l.name === state.curList ? "on" : ""}" data-l="${esc(l.name)}">${esc(l.name)}${l.items.filter(i => !i.done).length ? ` · ${l.items.filter(i => !i.done).length}` : ""}</button>`).join("");
+  $("#listTabs").querySelectorAll(".chip").forEach(c => c.onclick = () => { state.curList = c.dataset.l; renderLists(); });
+  const l = curList();
+  $("#liDel").classList.toggle("hidden", !l || l.kind === "shopping" || l.virtual);
+  $("#liShareInfo").innerHTML = l && l.shareUrl ? `קישור הרשימה לשיתוף: <a href="${esc(l.shareUrl)}" target="_blank" rel="noopener" style="color:var(--mod)">${esc(l.shareUrl)}</a>` : "";
+  $("#listItems").innerHTML = l && l.items.length ? l.items.map(i => `<div class="item ${i.done ? "done" : ""}" data-id="${i.id}"><input type="checkbox" ${i.done ? "checked" : ""} aria-label="נקנה"><span class="tx">${esc(i.text)}${i.qty ? ` <span class="qty">×${esc(i.qty)}</span>` : ""}</span>${i.by ? `<span class="by">${esc(i.by)}</span>` : ""}</div>`).join("") : `<p class="muted">הרשימה ריקה. אפשר גם לכתוב לנוני: "תוסיפי לקניות חלב ולחם".</p>`;
+}
+$("#listItems").addEventListener("change", async e => {
+  const row = e.target.closest(".item"); if (!row || e.target.type !== "checkbox") return;
+  try { const r = await api("POST", "/api/lists/check", { list: state.curList, ids: [Number(row.dataset.id)], done: e.target.checked }); state.lists = r.lists; renderLists(); } catch (err) { toast(err.message); }
+});
+$("#liAdd").onclick = async () => {
+  const t = $("#liText").value.trim(); if (!t) return $("#liText").focus();
+  try { const r = await api("POST", "/api/lists/items", { list: state.curList, items: t.split(/[,،\n]+/).map(x => x.trim()).filter(Boolean) }); state.lists = r.lists; if (r.household) state.household = r.household; $("#liText").value = ""; renderLists(); renderHousehold(); } catch (e) { toast(e.message); }
+};
+$("#liText").addEventListener("keydown", e => { if (e.key === "Enter" && !e.isComposing) $("#liAdd").click(); });
+$("#liClear").onclick = async () => { try { const r = await api("POST", "/api/lists/clear", { list: state.curList }); state.lists = r.lists; renderLists(); toast("הרשימה נוקתה"); } catch (e) { toast(e.message); } };
+$("#liNew").onclick = () => { const n = prompt("שם הרשימה החדשה (למשל: לטיול, לחופשה, מתנות)"); if (!n || !n.trim()) return; state.lists.push({ name: n.trim(), kind: "list", items: [], virtual: true }); state.curList = n.trim(); renderLists(); $("#liText").focus(); };
+$("#liDel").onclick = async () => { if (!confirm(`למחוק את הרשימה "${state.curList}"?`)) return; try { const r = await api("DELETE", "/api/lists?name=" + encodeURIComponent(state.curList)); state.lists = r.lists; state.curList = ""; renderLists(); } catch (e) { toast(e.message); } };
+
+/* ---------- שיתוף רשימה: תמונה מעוצבת (Canvas) + קישור לסימון ---------- */
+function listImage(l, url) {
+  const items = l.items.slice(0, 18), W = 1080, pad = 64, rowH = 86, head = 300, footH = 150;
+  const H = head + Math.max(1, items.length) * rowH + (l.items.length > 18 ? 60 : 0) + footH;
+  const c = document.createElement("canvas"); c.width = W; c.height = H; const x = c.getContext("2d");
+  x.fillStyle = "#0b0a0e"; x.fillRect(0, 0, W, H);
+  const rr = (X, Y, w, h, r) => { x.beginPath(); x.moveTo(X + r, Y); x.arcTo(X + w, Y, X + w, Y + h, r); x.arcTo(X + w, Y + h, X, Y + h, r); x.arcTo(X, Y + h, X, Y, r); x.arcTo(X, Y, X + w, Y, r); x.closePath(); };
+  x.fillStyle = "#17151c"; rr(32, 32, W - 64, H - 64, 44); x.fill(); x.strokeStyle = "rgba(255,45,154,.35)"; x.lineWidth = 3; x.stroke();
+  const g = x.createLinearGradient(0, 0, W, 0); g.addColorStop(0, "#b4188f"); g.addColorStop(1, "#ff2d9a");
+  x.fillStyle = g; rr(32, 32, W - 64, 150, 44); x.fill(); x.fillRect(32, 120, W - 64, 62);
+  x.direction = "rtl"; x.textAlign = "right"; x.textBaseline = "middle";
+  x.fillStyle = "#fff"; x.font = "800 56px Heebo, Arial, sans-serif"; x.fillText(l.name === "קניות" ? "רשימת קניות" : l.name, W - pad - 20, 100);
+  x.textAlign = "left"; x.font = "900 54px Heebo, Arial, sans-serif"; x.fillText("Noni", pad + 20, 100);
+  const open = l.items.filter(i => !i.done);
+  x.textAlign = "right"; x.fillStyle = "#a9a3b4"; x.font = "500 32px Heebo, Arial, sans-serif";
+  x.fillText(`${open.length} פריטים לקנות · ${new Date().toLocaleDateString("he-IL", { day: "2-digit", month: "2-digit" })}`, W - pad - 20, 236);
+  items.forEach((i, k) => {
+    const y = head + k * rowH + rowH / 2;
+    x.strokeStyle = "#2d2834"; x.lineWidth = 2; x.beginPath(); x.moveTo(pad + 20, y + rowH / 2); x.lineTo(W - pad - 20, y + rowH / 2); x.stroke();
+    x.beginPath(); x.arc(W - pad - 44, y, 22, 0, Math.PI * 2); x.lineWidth = 4; x.strokeStyle = i.done ? "#3ddc84" : "#ff2d9a"; x.stroke();
+    if (i.done) { x.strokeStyle = "#3ddc84"; x.lineWidth = 5; x.beginPath(); x.moveTo(W - pad - 56, y); x.lineTo(W - pad - 47, y + 9); x.lineTo(W - pad - 31, y - 9); x.stroke(); }
+    x.fillStyle = i.done ? "#7d7788" : "#f3f1f6"; x.font = "500 40px Heebo, Arial, sans-serif";
+    const t = i.text + (i.qty ? "  ×" + i.qty : ""); x.fillText(t, W - pad - 90, y);
+    if (i.done) { const w = x.measureText(t).width; x.strokeStyle = "#7d7788"; x.lineWidth = 3; x.beginPath(); x.moveTo(W - pad - 90, y); x.lineTo(W - pad - 90 - w, y); x.stroke(); }
+  });
+  if (l.items.length > 18) { x.fillStyle = "#a9a3b4"; x.font = "500 30px Heebo, Arial, sans-serif"; x.fillText(`ועוד ${l.items.length - 18}…`, W - pad - 90, head + 18 * rowH + 30); }
+  x.fillStyle = "#ff2d9a"; x.font = "700 30px Heebo, Arial, sans-serif"; x.fillText("לסמן מה נקנה — בקישור שבהודעה", W - pad - 20, H - 100);
+  x.fillStyle = "#6e6879"; x.font = "400 24px Heebo, Arial, sans-serif"; x.fillText("נוני · העוזרת האישית · © כל הזכויות שמורות לנעמה אורפלי", W - pad - 20, H - 58);
+  return new Promise(r => c.toBlob(r, "image/png"));
+}
+$("#liShare").onclick = async () => {
+  const l = curList(); if (!l) return;
+  const b = $("#liShare"); b.disabled = true;
+  try {
+    try { await document.fonts.load("800 56px Heebo"); await document.fonts.load("500 40px Heebo"); } catch (e) {}
+    let url;
+    if (DEMO) url = location.origin + "/";
+    else { const r = await api("POST", "/api/lists/share", { list: l.name }); url = r.url; l.shareUrl = url; }
+    const open = l.items.filter(i => !i.done);
+    const text = `${l.name === "קניות" ? "רשימת הקניות" : "רשימת " + l.name} (${open.length}):\n` + open.map(i => "☐ " + i.text + (i.qty ? " ×" + i.qty : "")).join("\n") + `\n\nלסמן מה נקנה: ${url}`;
+    const blob = await listImage(l, url);
+    const file = new File([blob], "noni-list.png", { type: "image/png" });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) { await navigator.share({ files: [file], text }); }
+    else {
+      const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "noni-list.png"; a.click();
+      window.open("https://wa.me/?text=" + encodeURIComponent(text), "_blank", "noopener");
+      toast("התמונה ירדה למכשיר — אפשר לצרף אותה להודעה");
+    }
+    $("#liShareInfo").innerHTML = `קישור הרשימה לשיתוף: <a href="${esc(url)}" target="_blank" rel="noopener" style="color:var(--mod)">${esc(url)}</a>`;
+  } catch (e) { if (e.name !== "AbortError") toast("השיתוף לא הצליח: " + e.message); }
+  finally { b.disabled = false; }
+};
+
+/* ---------- הבית: תורנויות ---------- */
+const CAD = { daily: "יומי", weekly: "שבועי", once: "חד-פעמי" };
+function renderChores() {
+  const today = todayISO();
+  $("#choreList").innerHTML = state.chores.length ? state.chores.map(c => `<div class="chore" data-id="${c.id}"><div class="t"><b>${esc(c.title)}</b><span>התור של <span class="turn">${esc(c.turn)}</span>${c.nextDate ? ` · ${c.nextDate < today ? '<span class="overdue">מ-' + fmtD(c.nextDate) + "</span>" : c.nextDate === today ? "היום" : fmtD(c.nextDate)}` : ""} · ${CAD[c.cadence] || c.cadence}${c.people.length > 1 ? " · סבב: " + c.people.map(esc).join(", ") : ""}</span></div><button class="btn sm primary" data-act="done">בוצע</button><button class="btn sm" data-act="del" title="מחיקה" aria-label="מחיקת התורנות">×</button></div>`).join("") : `<p class="muted">אין תורנויות עדיין. למשל: "להוציא זבל" — דנה, יוסי — שבועי. נוני תזכיר של מי התור.</p>`;
+}
+$("#choreList").addEventListener("click", async e => {
+  const b = e.target.closest("button[data-act]"); if (!b) return; const id = b.closest(".chore").dataset.id;
+  try {
+    if (b.dataset.act === "done") { const r = await api("POST", "/api/chores/" + id, {}); state.chores = r.chores; renderChores(); toast(r.chore ? `בוצע. עכשיו התור של ${r.chore.turn}` : "בוצע"); }
+    else { if (!confirm("למחוק את התורנות?")) return; const r = await api("DELETE", "/api/chores/" + id); state.chores = r.chores; renderChores(); }
+  } catch (err) { toast(err.message); }
+});
+$("#chAdd").onclick = async () => {
+  const title = $("#chTitle").value.trim(); if (!title) return $("#chTitle").focus();
+  try { const r = await api("POST", "/api/chores", { title, people: $("#chPeople").value.split(/[,،]+/).map(x => x.trim()).filter(Boolean), cadence: $("#chCad").value }); state.chores = r.chores; if (r.household) state.household = r.household; renderChores(); renderHousehold(); $("#chTitle").value = ""; toast("התורנות נוספה"); } catch (e) { toast(e.message); }
+};
+
+/* ---------- הבית: הוצאות ---------- */
+function renderExpenses() {
+  const x = state.expenses; if (!x) return;
+  const hh = state.household;
+  $("#expWho").textContent = hh && hh.exists && hh.members.length > 1 ? "משותף" : "";
+  const diff = x.lastMonth.total ? Math.round((x.month.total - x.lastMonth.total) / x.lastMonth.total * 100) : null;
+  $("#expKpis").innerHTML = `<div class="kpi"><b>${fmtILS(x.week.total)}</b><span>השבוע</span></div><div class="kpi"><b>${fmtILS(x.month.total)}</b><span>החודש</span></div><div class="kpi"><b>${fmtILS(x.lastMonth.total)}</b><span>חודש שעבר${diff != null ? ` · ${diff > 0 ? "+" : ""}${diff}%` : ""}</span></div>`;
+  const max = Math.max(1, ...x.month.byCategory.map(c => c.amount));
+  $("#expCats").innerHTML = x.month.byCategory.slice(0, 6).map(c => `<div class="bar"><span class="lbl">${esc(c.category)}</span><span class="tr"><span class="fl" style="width:${Math.round(c.amount / max * 100)}%"></span></span><span class="v">${fmtILS(c.amount)}</span></div>`).join("") || `<p class="muted">עדיין אין הוצאות החודש. אפשר לכתוב לנוני "שילמתי 120 בסופר" — או לצלם קבלה בווטסאפ.</p>`;
+  $("#expList").innerHTML = x.recent.map(e => `<div class="exp" data-id="${e.id}"><span class="amt">${fmtILS(e.amount)}</span><span class="cat">${esc(e.category)}</span><span class="nt">${esc(e.note)}${e.by && hh && hh.members.length > 1 ? " · " + esc(e.by) : ""}</span><span class="muted" style="font-size:12px">${fmtD(e.date)}</span><button class="btn sm" data-act="del" title="מחיקה" aria-label="מחיקת ההוצאה">×</button></div>`).join("");
+  if (!$("#exCat").options.length) $("#exCat").innerHTML = (state.categories || []).map(c => `<option>${esc(c)}</option>`).join("");
+}
+$("#expList").addEventListener("click", async e => { const b = e.target.closest("button[data-act=del]"); if (!b) return; try { const r = await api("DELETE", "/api/expenses/" + b.closest(".exp").dataset.id); state.expenses = r.expenses; renderExpenses(); } catch (err) { toast(err.message); } });
+$("#exAdd").onclick = async () => {
+  const amount = Math.round(Number($("#exAmt").value) * 100) / 100; if (!(amount > 0)) { toast("צריך סכום חיובי"); return $("#exAmt").focus(); }
+  try { const r = await api("POST", "/api/expenses", { amount, category: $("#exCat").value, note: $("#exNote").value.trim() }); state.expenses = r.expenses; renderExpenses(); $("#exAmt").value = ""; $("#exNote").value = ""; toast("נרשם"); } catch (e) { toast(e.message); }
+};
+
+/* ---------- הבית: בני הבית ---------- */
+function renderHousehold() {
+  const h = state.household;
+  if (!h || !h.exists) { $("#hhBody").innerHTML = `<p class="muted">רשימות, תורנויות והוצאות אפשר לחלוק עם בן/בת זוג או שותפים: כולם רואים ומעדכנים את אותה רשימה.</p><div class="row multi"><button class="btn sm primary" id="hhCreate">יצירת בית וקוד הזמנה</button><input type="text" id="hhCode" placeholder="קיבלת קוד? הקלידי כאן" dir="ltr" style="flex:1 1 140px;width:auto;text-align:left;text-transform:uppercase"><button class="btn sm" id="hhJoin">הצטרפות</button></div>`; }
+  else { $("#hhBody").innerHTML = `<div>${h.members.map(m => `<span class="member ${m.me ? "me" : ""}">${esc(m.name)}${m.me ? " (אני)" : ""}</span>`).join("")}</div><p class="muted" style="margin:6px 0 2px">כדי לצרף מישהו/י: שולחים את הקוד, והוא/היא מקליד/ה אותו כאן בלשונית "הבית".</p><div class="code">${esc(h.code)}</div><div class="row multi"><a class="btn sm primary" id="hhShare" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(`היי, הצטרפ/י לבית שלי בנוני — קוד ${h.code}. נכנסים ל-${location.origin} ← הבית ← הצטרפות.`)}">שיתוף בווטסאפ</a><input type="text" id="hhCode" placeholder="קוד של בית אחר" dir="ltr" style="flex:1 1 120px;width:auto;text-align:left;text-transform:uppercase"><button class="btn sm" id="hhJoin">מעבר</button><button class="btn sm" id="hhLeave">עזיבה</button></div>`; }
+  const j = $("#hhJoin"); if (j) j.onclick = async () => { const code = $("#hhCode").value.trim(); if (!code) return; try { const r = await api("POST", "/api/household/join", { code }); applyHome(r); toast("הצטרפת לבית"); } catch (e) { toast(e.message); } };
+  const c = $("#hhCreate"); if (c) c.onclick = async () => { try { const r = await api("POST", "/api/household/create", {}); state.household = r.household; renderHousehold(); renderLists(); } catch (e) { toast(e.message); } };
+  const lv = $("#hhLeave"); if (lv) lv.onclick = async () => { if (!confirm("לעזוב את הבית המשותף? הרשימות יישארו אצל שאר בני הבית.")) return; try { const r = await api("POST", "/api/household/leave", {}); applyHome(r); toast("עזבת"); } catch (e) { toast(e.message); } };
+}
+function applyHome(r) { if (r.household) state.household = r.household; if (r.lists) state.lists = r.lists; if (r.chores) state.chores = r.chores; if (r.expenses) state.expenses = r.expenses; renderHousehold(); renderLists(); renderChores(); renderExpenses(); }
+
+/* ---------- חיבורים ---------- */
+const GICON = '<svg class="i" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>';
+function renderConnections() {
+  const c = state.connections; if (!c) return;
+  const g = c.google;
+  const what = (g.scopes || []).map(s => ({ calendar: "יומן", gmail: "מייל" })[s] || s).join(" + ") || "יומן";
+  let status, action;
+  if (!g.available) { status = "<span>עדיין לא הופעל על ידי מנהל/ת הפלטפורמה</span>"; action = ""; }
+  else if (g.connected && (g.scopes || []).includes("gmail") && !(g.granted || []).includes("gmail")) { status = `<span class="ok">מחובר · ${esc(g.email)}</span><span>היומן מחובר; למיילים בתדריך צריך לאשר גם גישה למייל</span>`; action = `<button class="btn sm primary" data-act="gconn">הוספת מייל</button> <button class="btn sm" data-act="gdisc">ניתוק</button>`; }
+  else if (g.connected) { status = `<span class="ok">מחובר · ${esc(g.email)}</span>`; action = `<button class="btn sm" data-act="gdisc">ניתוק</button>`; }
+  else if (g.status === "revoked" || g.status === "error") { status = `<span style="color:var(--err)">החיבור פג${g.error ? " — " + esc(g.error).slice(0, 60) : ""}</span>`; action = `<button class="btn sm primary" data-act="gconn">חיבור מחדש</button>`; }
+  else { status = "<span>לא מחובר</span>"; action = `<button class="btn sm primary" data-act="gconn">חיבור גוגל</button>`; }
+  const wished = state.wishes || {};
+  const soon = CONNECTORS.map(k => `<div class="conn soon"><span class="ic">${k.icon}</span><div class="t"><b>${k.name}</b><span>${k.desc}</span></div>${wished[k.id] ? `<span class="pill mod">נרשמת</span>` : `<button class="btn sm" data-act="wish" data-p="${k.id}">רוצה את זה</button>`}</div>`).join("");
+  $("#connList").innerHTML = `<div class="conn"><span class="ic">${GICON}</span><div class="t"><b>גוגל — ${what}</b>${status}</div>${action}</div>
+    <div class="muted" style="margin:12px 0 4px;font-size:12.5px">בקרוב — סמני מה חשוב לך ונעדכן כשזה מוכן:</div>${soon}`;
+}
+/* חיבורים מתוכננים (קטלוג בלבד — הצבעה, לא חיבור בפועל) */
+const CONNECTORS = [
+  { id: "microsoft", name: "מיקרוסופט 365 — יומן ומייל (Outlook)", desc: "לחשבון עבודה או ארגוני", icon: '<svg class="i" viewBox="0 0 24 24"><rect x="3" y="3" width="8" height="8" rx="1"/><rect x="13" y="3" width="8" height="8" rx="1"/><rect x="3" y="13" width="8" height="8" rx="1"/><rect x="13" y="13" width="8" height="8" rx="1"/></svg>' },
+  { id: "telegram", name: "טלגרם", desc: "לדבר עם נוני גם בטלגרם", icon: '<svg class="i" viewBox="0 0 24 24"><path d="M21 4L3 11l6 2 2 6 3-4 5 3z"/><path d="M9 13l8-7"/></svg>' },
+  { id: "ical", name: "יומן אפל / כל יומן (ICS)", desc: "קישור מנוי ליומן — קריאה בלבד", icon: '<svg class="i" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4M8 14h3M13 14h3M8 18h3"/></svg>' },
+  { id: "tasks", name: "רשימות משימות — Google Tasks / Todoist", desc: "סנכרון דו-כיווני של המשימות", icon: '<svg class="i" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>' },
+  { id: "notion", name: "Notion", desc: "לקרוא ולכתוב בדפים ובמאגרים שלך", icon: '<svg class="i" viewBox="0 0 24 24"><path d="M4 4h16v16H4z"/><path d="M8 16V8l8 8V8"/></svg>' },
+  { id: "slack", name: "Slack", desc: "תזכורות וסיכומים לערוץ שלך", icon: '<svg class="i" viewBox="0 0 24 24"><path d="M8 3v6M16 15v6M3 16h6M15 8h6"/><circle cx="8" cy="12" r="2"/><circle cx="16" cy="12" r="2"/><circle cx="12" cy="8" r="2"/><circle cx="12" cy="16" r="2"/></svg>' },
+  { id: "drive", name: "Google Drive", desc: "לשאול על קבצים ומסמכים", icon: '<svg class="i" viewBox="0 0 24 24"><path d="M8 4h8l6 10-4 6H6l-4-6z"/><path d="M8 4l4 10h10M6 20l6-6"/></svg>' },
+  { id: "sms", name: "SMS", desc: "תזכורות במסרון למי שבלי ווטסאפ", icon: '<svg class="i" viewBox="0 0 24 24"><rect x="6" y="2" width="12" height="20" rx="2"/><path d="M10 18h4"/></svg>' },
+];
+$("#connList").addEventListener("click", async e => {
+  const b = e.target.closest("button[data-act]"); if (!b) return;
+  if (b.dataset.act === "gconn") { if (DEMO) { state.connections.google.connected = true; state.connections.google.email = "dana@example.com"; renderConnections(); toast("בדמו: גוגל חובר"); return; } location.href = "/api/connect/google"; return; }
+  if (b.dataset.act === "wish") { const pid = b.dataset.p; state.wishes = state.wishes || {}; state.wishes[pid] = true; renderConnections(); toast("נרשם — נודיע לך כשהחיבור יהיה מוכן"); if (!DEMO) { try { await api("POST", "/api/connect/wish", { provider: pid }); } catch (e) {} } return; }
+  if (b.dataset.act === "gdisc") { try { const r = await api("DELETE", "/api/connect/google"); state.connections = r.connections; renderConnections(); toast("נותק"); } catch (err) { toast(err.message); } }
+});
+
+/* ---------- הגדרות וניהול ---------- */
+$("#pSave").onclick = async () => {
+  try { await api("PUT", "/api/prefs", { displayName: $("#pName").value.trim(), nickname: $("#pNick").value.trim(), style: $("#pStyle").value.trim() }); state.me.name = $("#pName").value.trim() || state.me.name; updateWho(); toast("נשמר"); } catch (e) { toast(e.message); }
+};
+function ruleRow(r) {
+  return `<div class="rule" data-id="${r.id || ""}">
+    <div class="row"><select class="kind"><option value="rule" ${r.kind === "rule" ? "selected" : ""}>כלל</option><option value="skill" ${r.kind === "skill" ? "selected" : ""}>יכולת</option><option value="automation" ${r.kind === "automation" ? "selected" : ""}>אוטומציה</option></select>
+      <input type="text" class="title" value="${esc(r.title)}" placeholder="כותרת"><label class="muted row en-l" style="gap:4px"><input type="checkbox" class="en" ${r.enabled !== false ? "checked" : ""}>פעיל</label><button class="btn sm rm" title="מחיקה">×</button></div>
+    <textarea class="body" placeholder="הנוסח שנכנס להנחיית המערכת">${esc(r.body)}</textarea></div>`;
+}
+function readRules(sel) { return [...document.querySelectorAll(sel + " .rule")].map(el => ({ id: el.dataset.id ? Number(el.dataset.id) : null, kind: el.querySelector(".kind").value, title: el.querySelector(".title").value.trim(), body: el.querySelector(".body").value.trim(), enabled: el.querySelector(".en").checked })).filter(r => r.title || r.body); }
+function wireRules(sel) { document.querySelectorAll(sel + " .rm").forEach(b => b.onclick = () => b.closest(".rule").remove()); }
+let adminLoaded = false;
+async function loadAdmin() {
+  if (!state.me || adminLoaded) return; adminLoaded = true;
+  const role = state.me.role;
+  if (role === "platform_admin") {
+    $("#adminUsers").style.display = ""; await loadUsers();
+    $("#adminPlatform").style.display = "";
+    try { const r = await api("GET", "/api/admin/platform-rules"); $("#platformRules").innerHTML = r.rules.map(ruleRow).join(""); wireRules("#platformRules"); } catch (e) { toast(e.message); }
+  }
+}
+async function loadUsers() {
+  try {
+    const r = await api("GET", "/api/admin/users");
+    $("#seatsInfo").textContent = `${r.users.filter(u => u.active).length} פעילים · ${r.users.length} נרשמו`;
+    $("#usersTable").innerHTML = `<tr><th>שם</th><th>מייל</th><th>תפקיד</th><th>כניסה אחרונה</th><th></th></tr>` + r.users.map(u => `<tr><td>${esc(u.display_name)}</td><td dir="ltr" style="text-align:right">${esc(u.email)}</td><td>${u.role === "platform_admin" ? "מנהלת הפלטפורמה" : "משתמש/ת"}${u.active ? "" : " · לא פעיל/ה"}</td><td>${u.last_seen_at ? fmtDT(u.last_seen_at) : "—"}</td><td>${u.role === "platform_admin" ? "" : `<button class="btn sm" data-uact="${u.active ? "off" : "on"}" data-email="${esc(u.email)}" data-role="${esc(u.role)}">${u.active ? "השבתה" : "הפעלה"}</button>`}</td></tr>`).join("");
+    $("#usersTable").querySelectorAll("[data-uact]").forEach(b => b.onclick = async () => {
+      const open = b.dataset.uact === "on";
+      if (!open && !confirm("להשבית את " + b.dataset.email + "? לא יוכל/תוכל להיכנס עד הפעלה מחדש.")) return;
+      try { const r = await api("POST", "/api/admin/users", { email: b.dataset.email, role: b.dataset.role, active: open }); await loadUsers(); toast(open ? "הופעל/ה" : "הושבת/ה"); } catch (e) { toast(e.message); }
+    });
+  } catch (e) { toast(e.message); }
+}
+$("#platformAddRule").onclick = () => { $("#platformRules").insertAdjacentHTML("beforeend", ruleRow({ kind: "rule", title: "", body: "" })); wireRules("#platformRules"); };
+$("#platformSaveRules").onclick = async () => { try { const r = await api("PUT", "/api/admin/platform-rules", { rules: readRules("#platformRules") }); $("#platformRules").innerHTML = r.rules.map(ruleRow).join(""); wireRules("#platformRules"); toast("כללי הפלטפורמה פורסמו לכל המשתמשים"); } catch (e) { toast(e.message); } };
+
+/* ---------- ווטסאפ ---------- */
+async function loadWa() {
+  try { const r = await api("GET", "/api/wa/link"); renderWa(r.link); } catch (e) { $("#waBody").innerHTML = `<p class="muted">${esc(e.message)}</p>`; }
+}
+function renderWa(w) {
+  if (!w.available) { $("#waBody").innerHTML = `<p class="muted">ערוץ הווטסאפ עדיין לא הופעל בשרת. בינתיים — כאן באתר.</p>`; return; }
+  if (w.linked) {
+    $("#waBody").innerHTML = `<p>המספר <b dir="ltr">+${esc(w.phone)}</b> מקושר. כותבים לנוני בווטסאפ למספר <b dir="ltr">${esc(w.number)}</b> — כמו כאן. תזכורות יישלחו לשם.</p><div class="row"><button class="btn sm" id="waUnlink">ניתוק</button></div>`;
+    $("#waUnlink").onclick = async () => { if (!confirm("לנתק את הווטסאפ?")) return; try { const r = await api("DELETE", "/api/wa/link"); renderWa(r.link); } catch (e) { toast(e.message); } };
+    return;
+  }
+  if (w.code) {
+    $("#waBody").innerHTML = `<p>כמעט סיימנו. שלחו בווטסאפ למספר <b dir="ltr">${esc(w.number)}</b> את ההודעה:</p><p style="font-size:22px;font-weight:800;letter-spacing:1px;text-align:center;margin:6px 0">קוד ${esc(w.code)}</p><p class="muted">מהמספר <span dir="ltr">+${esc(w.phone)}</span>. אחרי האישור הכרטיס הזה יתעדכן לבד.</p><div class="row"><a class="btn sm primary" target="_blank" rel="noopener" href="https://wa.me/${esc(String(w.number).replace(/[^\d]/g, ""))}?text=${encodeURIComponent("קוד " + w.code)}">פתיחת ווטסאפ עם הקוד</a><button class="btn sm" id="waRestart">מספר אחר</button></div>`;
+    $("#waRestart").onclick = () => renderWa({ available: true, number: w.number, phone: "", linked: false, code: "" });
+    waPoll();
+    return;
+  }
+  $("#waBody").innerHTML = `<p class="muted">מקשרים את הטלפון פעם אחת, ואז מדברים עם נוני בווטסאפ בדיוק כמו כאן. תזכורות ותדריך בוקר יגיעו לשם.</p><div class="row"><input type="tel" id="waPhone" placeholder="050-1234567" dir="ltr" style="text-align:left"><button class="btn sm primary" id="waStart">קישור</button></div>`;
+  $("#waStart").onclick = async () => { try { const r = await api("POST", "/api/wa/link", { phone: $("#waPhone").value }); renderWa(r.link); } catch (e) { toast(e.message); } };
+}
+let waTimer = null;
+function waPoll() { clearTimeout(waTimer); waTimer = setTimeout(async () => { try { const r = await api("GET", "/api/wa/link"); if (r.link.linked) { renderWa(r.link); toast("הווטסאפ מקושר"); } else if (r.link.code) waPoll(); } catch (e) {} }, 4000); }
+
+/* ---------- הקלטה מהמיקרופון: MediaRecorder ← /api/voice (תמלול) ← שליחה כהודעה; נוני מנתבת לפי התוכן ---------- */
+let rec = null, recChunks = [], recT0 = 0, recTimer = null;
+const micBtn = $("#mic");
+function recMime() { for (const m of ["audio/webm;codecs=opus", "audio/webm", "audio/mp4", "audio/ogg;codecs=opus", "audio/mpeg"]) if (window.MediaRecorder && MediaRecorder.isTypeSupported(m)) return m; return ""; }
+async function micToggle() {
+  if (rec && rec.state === "recording") { rec.stop(); return; }
+  if (state.sending) return;
+  if (DEMO) return demoVoice();
+  if (!navigator.mediaDevices || !window.MediaRecorder) return toast("הדפדפן הזה לא תומך בהקלטה — אפשר לכתוב");
+  let stream;
+  try { stream = await navigator.mediaDevices.getUserMedia({ audio: true }); } catch (e) { return toast("אין הרשאה למיקרופון. אפשר לאשר בהגדרות הדפדפן."); }
+  const mime = recMime();
+  rec = new MediaRecorder(stream, mime ? { mimeType: mime } : undefined); recChunks = [];
+  rec.ondataavailable = e => { if (e.data && e.data.size) recChunks.push(e.data); };
+  rec.onstop = async () => {
+    stream.getTracks().forEach(t => t.stop()); clearInterval(recTimer); $("#recbar").classList.add("hidden"); micBtn.classList.remove("rec");
+    const blob = new Blob(recChunks, { type: rec.mimeType || mime || "audio/webm" }); rec = null;
+    if (Date.now() - recT0 < 700 || blob.size < 800) return toast("ההקלטה קצרה מדי");
+    micBtn.classList.add("busy"); const t = typing();
+    try {
+      const r = await fetch("/api/voice", { method: "POST", headers: { "Content-Type": blob.type }, body: blob, credentials: "same-origin" }).then(x => x.json());
+      t.remove();
+      if (!r.ok) return toast(r.error || "התמלול נכשל");
+      if (!r.text) return toast("לא שמעתי דיבור. אפשר לנסות שוב קרוב יותר למיקרופון");
+      await send("[הודעה קולית] " + r.text);
+    } catch (e) { t.remove(); toast("התמלול נכשל: " + e.message); }
+    finally { micBtn.classList.remove("busy"); }
+  };
+  rec.start(); recT0 = Date.now(); micBtn.classList.add("rec"); $("#recbar").classList.remove("hidden");
+  recTimer = setInterval(() => { const s = Math.floor((Date.now() - recT0) / 1000); $("#recTime").textContent = Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0"); if (s >= 60 && rec) rec.stop(); }, 250);
+}
+micBtn.onclick = micToggle;
+/* בדמו אין שרת — משתמשים בזיהוי הדיבור של הדפדפן אם יש */
+function demoVoice() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) return toast("בדמו ההקלטה עובדת בכרום/ספארי בלבד. נסו לכתוב: \"שילמתי 40 על קפה\"");
+  const r = new SR(); r.lang = "he-IL"; r.interimResults = false; r.maxAlternatives = 1;
+  micBtn.classList.add("rec"); $("#recbar").classList.remove("hidden"); $("#recTime").textContent = "";
+  r.onresult = e => { const txt = e.results[0][0].transcript; send("[הודעה קולית] " + txt); };
+  r.onerror = e => toast("ההקלטה לא הצליחה (" + e.error + ")");
+  r.onend = () => { micBtn.classList.remove("rec"); $("#recbar").classList.add("hidden"); };
+  r.start();
+}
+
+/* ---------- התקנה כאפליקציה (PWA) ---------- */
+let installEvt = null;
+const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.MSStream;
+const isStandalone = () => window.matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
+const lsGet = k => { try { return localStorage.getItem(k); } catch (e) { return null; } };
+const lsSet = (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} };
+window.addEventListener("beforeinstallprompt", e => { e.preventDefault(); installEvt = e; maybeOfferInstall(); });
+function showInstall(force) {
+  if (isStandalone()) { if (force) toast("נוני כבר מותקנת"); return; }
+  const steps = $("#installSteps"), go = $("#installGo");
+  if (installEvt) { steps.classList.add("hidden"); go.classList.remove("hidden"); }
+  else if (isIOS) { steps.innerHTML = `1. לוחצים על כפתור השיתוף <svg class="i" viewBox="0 0 24 24"><path d="M12 3v12"/><path d="M8 7l4-4 4 4"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg> בסרגל של ספארי<br>2. בוחרים "הוספה למסך הבית"<br>3. לוחצים "הוסף" — וזהו`; steps.classList.remove("hidden"); go.classList.add("hidden"); }
+  else { steps.innerHTML = /android/i.test(navigator.userAgent) ? `1. פותחים את הקישור בכרום (לא בתוך ווטסאפ)<br>2. תפריט ⋮ למעלה ← "הוספה למסך הבית" / "התקנת אפליקציה"<br>3. מאשרים — והאייקון של נוני במסך` : `בדפדפן: תפריט ⋮ ← "התקנת אפליקציה" או "הוספה למסך הבית".`; steps.classList.remove("hidden"); go.classList.add("hidden"); }
+  $("#installSheet").classList.remove("hidden");
+  setTimeout(() => (installEvt ? $("#installGo") : $("#installLater")).focus(), 50);
+}
+function hideInstall(snooze) { $("#installSheet").classList.add("hidden"); if (snooze) lsSet("noni_install_snooze", String(Date.now())); }
+function maybeOfferInstall() {
+  if (isStandalone() || !state.me) return;
+  const last = Number(lsGet("noni_install_snooze") || 0);
+  if (Date.now() - last < 3 * 86400e3) return;
+  setTimeout(() => showInstall(false), 2500);
+}
+$("#installGo").onclick = async () => {
+  if (!installEvt) return hideInstall(true);
+  installEvt.prompt(); const r = await installEvt.userChoice.catch(() => ({ outcome: "dismissed" })); installEvt = null;
+  hideInstall(true); if (r.outcome === "accepted") toast("נוני מותקנת — חפשי את האייקון במסך הבית");
+};
+$("#installLater").onclick = () => hideInstall(true);
+$("#installClose").onclick = () => hideInstall(true);
+$("#installSheet").addEventListener("click", e => { if (e.target === $("#installSheet")) hideInstall(true); });
+$("#installBtn").onclick = () => showInstall(true);
+document.addEventListener("keydown", e => { if (e.key === "Escape" && !$("#installSheet").classList.contains("hidden")) hideInstall(true); });
+if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost")) window.addEventListener("load", () => navigator.serviceWorker.register("/sw.js").catch(() => {}));
+
+/* ---------- אתחול ---------- */
+function updateWho() { $("#who").innerHTML = `<b>${esc(state.me.name)}</b>${esc(state.me.email)}`; }
+async function boot() {
+  try {
+    const r = await api("GET", "/api/bootstrap");
+    state.me = r.me; state.tasks = r.tasks; state.reminders = r.reminders; state.left = r.left; state.prefs = r.prefs || {}; state.now = r.now;
+    state.connections = r.connections || null;
+    state.household = r.household || null; state.lists = r.lists || []; state.chores = r.chores || []; state.expenses = r.expenses || null; state.categories = r.categories || [];
+    updateWho(); renderTasks(); renderReminders(); renderConnections(); loadWa(); renderLists(); renderChores(); renderExpenses(); renderHousehold(); loadPlan();
+    const back = new URLSearchParams(location.hash.split("?")[1] || "");
+    if (location.hash.startsWith("#settings")) { show("settings"); if (back.get("conn")) toast(back.get("conn")); else if (location.hash.includes("?")) toast("גוגל חובר בהצלחה"); history.replaceState(null, "", location.pathname); }
+    else if (/^#(tasks|home|brief)$/.test(location.hash)) show(location.hash.slice(1));
+    $("#pName").value = r.me.name || ""; $("#pNick").value = state.prefs.nickname || ""; $("#pStyle").value = state.prefs.style || "";
+    $("#verInfo").textContent = `נוני · גרסה ${r.version}` + (DEMO ? " · דמו (נתונים פיקטיביים)" : r.provider === "mock" ? " · מצב בדיקה בלי מודל" : "");
+    $("#briefDate").textContent = `יום ${r.now.weekday}, ${fmtD(r.now.date)}`;
+    if (DEMO) addMsg("sys", "זהו דמו של נוני — הנתונים פיקטיביים ונשמרים בדף הזה בלבד.");
+    addMsg("bot", `היי ${r.me.name}, אני נוני. משימות, תזכורות, רשימת קניות משותפת, תורנויות, הוצאות ותכנון היום — כאן או בווטסאפ. על מה נתחיל?`);
+    pollDue(); maybeOfferInstall();
+  } catch (e) {
+    if (e.login) { showLogin(); return; }
+    $("#msgs").innerHTML = `<div class="card"><h2>אין גישה</h2><p>${esc(e.message)}</p></div>`;
+    $("#composer").classList.add("hidden");
+  }
+}
+
+/* ============================================================
+   שכבת הדמו — נתונים פיקטיביים, "חטיבת ביניים דמו"
+   ============================================================ */
+function demoApi(method, path, body) {
+  const D = demoApi.D || (demoApi.D = demoData());
+  const now = () => { const d = new Date(); const p = Object.fromEntries(new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Jerusalem", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", weekday: "long", hour12: false }).formatToParts(d).map(x => [x.type, x.value])); return { iso: d.toISOString(), date: `${p.year}-${p.month}-${p.day}`, time: `${p.hour}:${p.minute}`, weekday: { Sunday: "ראשון", Monday: "שני", Tuesday: "שלישי", Wednesday: "רביעי", Thursday: "חמישי", Friday: "שישי", Saturday: "שבת" }[p.weekday] }; };
+  const sortT = () => D.tasks.sort((a, b) => (a.status > b.status ? 1 : a.status < b.status ? -1 : 0) || String(a.dueDate || "9").localeCompare(String(b.dueDate || "9")) || a.priority - b.priority);
+  const ok = o => Promise.resolve(Object.assign({ ok: true }, o));
+  const pending = () => D.reminders.filter(r => r.status === "pending");
+  const addDays = (iso, n) => { const d = new Date(iso + "T12:00:00Z"); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); };
+  const m = path.match(/^\/api\/(\w[\w-]*)(?:\/(\w[\w-]*))?/); const res = m[1], sub = m[2];
+  if (res === "config") return ok({ googleClientId: "", auth: "demo", whatsapp: true, waNumber: "+972-50-000-0000" });
+  if (res === "wa") { D.wa = D.wa || { available: true, number: "+972-50-000-0000", phone: "", linked: false, code: "" };
+    if (method === "POST") { D.wa.phone = "972" + String(body.phone || "").replace(/\D/g, "").replace(/^0/, ""); D.wa.code = "483920"; D.wa.linked = false; setTimeout(() => { D.wa.linked = true; D.wa.code = ""; }, 9000); }
+    if (method === "DELETE") D.wa = { available: true, number: "+972-50-000-0000", phone: "", linked: false, code: "" };
+    return ok({ link: D.wa }); }
+  const hhOut = () => ({ exists: !!D.hh, name: "הבית שלי", code: D.hh ? "NONI42" : "", members: D.hh ? [{ name: "דנה", email: "dana@example.com", me: true }, { name: "יוסי", email: "yossi@example.com", me: false }] : [] });
+  const listsOut = () => D.lists;
+  const choreOut = c => Object.assign({}, c, { turn: c.people[c.idx % c.people.length] });
+  const choresOut = () => D.chores.map(choreOut);
+  const expOut = () => { const n = now().date, m = n.slice(0, 7); const month = D.expenses.filter(e => e.date.startsWith(m)); const total = a => Math.round(a.reduce((x, e) => x + e.amount, 0)); const byCat = {}; month.forEach(e => byCat[e.category] = (byCat[e.category] || 0) + e.amount);
+    const wk = new Date(n + "T12:00:00Z"); wk.setUTCDate(wk.getUTCDate() - wk.getUTCDay()); const wf = wk.toISOString().slice(0, 10);
+    return { month: { from: m + "-01", total: total(month), byCategory: Object.entries(byCat).sort((a, b) => b[1] - a[1]).map(([category, amount]) => ({ category, amount: Math.round(amount) })) }, week: { from: wf, total: total(month.filter(e => e.date >= wf)) }, lastMonth: { month: "", total: 2860 }, recent: month.slice().sort((a, b) => b.date.localeCompare(a.date)).slice(0, 8) }; };
+  if (res === "bootstrap") return ok({ me: D.me, version: "דמו", now: now(), tasks: sortT(), reminders: pending(), conversations: [{ id: 1, title: "מה יש לי היום?", updated_at: new Date().toISOString() }, { id: 2, title: "תוסיפי לקניות חלב ולחם", updated_at: new Date(Date.now() - 86400e3).toISOString() }], left: 60, prefs: { nickname: "נוני", style: "קצר ותכליתי" }, provider: "demo", connections: D.connections, household: hhOut(), lists: listsOut(), chores: choresOut(), expenses: expOut(), categories: ["מזון", "בית", "ילדים", "רכב", "בריאות", "פנאי", "ביגוד", "חשבונות", "אחר"] });
+  if (res === "household") { if (sub === "join") { if (String(body.code).toUpperCase() !== "NONI42") return Promise.reject(new Error("קוד הזמנה לא נמצא.")); D.hh = true; } if (sub === "leave") D.hh = false; if (sub === "create") D.hh = true; return ok({ household: hhOut(), lists: listsOut(), chores: choresOut(), expenses: expOut() }); }
+  if (res === "lists") {
+    const getL = nm => { nm = nm || "קניות"; let l = D.lists.find(x => x.name === nm); if (!l) { l = { name: nm, kind: "list", items: [] }; D.lists.push(l); } return l; };
+    if (sub === "items") { const l = getL(body.list); (body.items || []).forEach(it => { const t = typeof it === "string" ? it : it.text; if (t && !l.items.some(x => x.text === t && !x.done)) l.items.push({ id: D.seq++, text: t, qty: (it && it.qty) || "", done: false, by: "דנה" }); }); }
+    if (sub === "check") { const l = getL(body.list); l.items.forEach(i => { if ((body.ids || []).includes(i.id) || (body.texts || []).some(t => i.text.includes(t)) || body.all) i.done = body.done !== false; }); }
+    if (sub === "clear") { const l = getL(body.list); l.items = l.items.filter(i => !i.done); }
+    if (sub === "share") return ok({ url: location.origin + "/", list: body.list || "קניות" });
+    if (method === "DELETE") { const nm = decodeURIComponent((path.split("name=")[1] || "")); D.lists = D.lists.filter(l => l.name !== nm); }
+    return ok({ lists: listsOut(), household: hhOut() }); }
+  if (res === "chores") {
+    if (method === "POST" && !sub) { const c = { id: D.seq++, title: body.title, people: body.people && body.people.length ? body.people : ["דנה"], idx: 0, cadence: body.cadence || "weekly", nextDate: now().date, lastDoneBy: "" }; D.chores.push(c); return ok({ chore: choreOut(c), chores: choresOut(), household: hhOut() }); }
+    if (method === "POST" && sub) { const c = D.chores.find(x => String(x.id) === sub); if (c) { c.lastDoneBy = c.people[c.idx % c.people.length]; c.idx++; if (c.cadence === "once") { D.chores = D.chores.filter(x => x !== c); } else c.nextDate = addDays(now().date, c.cadence === "daily" ? 1 : 7); } return ok({ chore: c && choreOut(c), chores: choresOut() }); }
+    if (method === "DELETE") { D.chores = D.chores.filter(x => String(x.id) !== sub); return ok({ chores: choresOut() }); }
+    return ok({ chores: choresOut() }); }
+  if (res === "expenses") {
+    if (method === "POST") { const e = { id: D.seq++, amount: Number(body.amount), category: body.category || "אחר", note: body.note || "", date: now().date, by: "דנה" }; D.expenses.push(e); return ok({ expense: e, expenses: expOut() }); }
+    if (method === "DELETE") { D.expenses = D.expenses.filter(x => String(x.id) !== sub); }
+    return ok({ expenses: expOut() }); }
+  if (res === "plan") { if (method === "GET") return ok({ date: now().date, plan: D.plan || "" }); D.plan = (body.note ? `עדכנתי לפי "${body.note}":\n` : "") + "08:00–08:30 — מייל ותזכורות\n08:30–10:00 — להכין מבחן לט1 (עדיפות גבוהה)\n10:00–10:15 — הפסקה\n10:15–11:30 — לבדוק בחנים של ח3\n14:00–15:00 — ישיבת צוות מתמטיקה (יומן)\n15:00–15:20 — שיחה עם אמא של נועם\n16:30 — רופא שיניים (יומן)\n\nמה לדחות למחר: לשלוח סיכום ישיבת צוות."; return ok({ date: now().date, plan: D.plan, left: 58 }); }
+  if (res === "connect" && method === "DELETE") { D.connections.google.connected = false; D.connections.google.email = ""; return ok({ connections: D.connections }); }
+  if (res === "tasks" && method === "GET") return ok({ tasks: sortT() });
+  if (res === "tasks" && method === "POST" && !sub) { const t = { id: D.seq++, title: body.title, notes: body.notes || "", dueDate: body.dueDate || "", dueTime: body.dueTime || "", priority: body.priority || 2, status: "open" }; D.tasks.push(t); return ok({ task: t, tasks: sortT() }); }
+  if (res === "tasks" && sub) { const t = D.tasks.find(x => String(x.id) === sub); if (!t) return Promise.reject(new Error("המשימה לא נמצאה.")); Object.assign(t, body); return ok({ task: t, tasks: sortT() }); }
+  if (res === "reminders" && method === "GET") return ok({ reminders: pending() });
+  if (res === "reminders" && method === "POST" && sub === "due") { const due = pending().filter(r => new Date(r.remindAt) <= Date.now()); due.forEach(r => r.status = "shown"); return ok({ due, reminders: pending() }); }
+  if (res === "reminders" && method === "POST") { const r = { id: D.seq++, text: body.text, remindAt: body.remindAt, status: "pending" }; D.reminders.push(r); D.reminders.sort((a, b) => a.remindAt < b.remindAt ? -1 : 1); return ok({ reminder: r, reminders: pending() }); }
+  if (res === "reminders" && method === "DELETE") { const r = D.reminders.find(x => String(x.id) === sub); if (r) r.status = "cancelled"; return ok({ reminders: pending() }); }
+  if (res === "prefs") return ok({});
+  if (res === "brief") { const n = now(); return ok({ now: n, tasks: sortT().filter(t => t.status === "open" && t.dueDate && t.dueDate <= n.date), reminders: pending().filter(r => new Date(r.remindAt) - Date.now() < 36 * 3600e3), calendar: D.connections.google.connected ? D.calendar : null, mail: D.connections.google.connected ? [{ subject: "סיכום ישיבת הנהלה", from: "אביעד" }, { subject: "טיול שכבת ז — אישורי הורים", from: "מזכירות" }] : null, chores: choresOut().filter(c => c.nextDate <= n.date), expenses: { week: expOut().week.total, month: expOut().month.total }, shopping: (D.lists[0] ? D.lists[0].items.filter(i => !i.done).length : 0) }); }
+  if (res === "admin" && sub === "platform-rules") { if (method === "PUT") D.platformRules = body.rules.map((r, i) => Object.assign({ id: r.id || D.seq++ }, r)); return ok({ rules: D.platformRules }); }
+  if (res === "admin" && sub === "users") {
+    if (method === "POST") { const em = String(body.email || "").toLowerCase(); const ex = D.users.find(u => u.email === em); const act = body.active !== false;
+      if (ex) { ex.role = body.role || ex.role; ex.active = act; } else D.users.push({ id: D.seq++, email: em, display_name: em.split("@")[0], role: body.role, active: act, last_seen_at: null });
+      return ok({ users: D.users, seats: 60, plan: "full", gate: { run: act ? "granted" : "revoked", iap: act ? "granted" : "revoked" } }); }
+    return ok({ users: D.users, seats: 60, plan: "full" }); }
+  if (res === "chat") {
+    const q = String(body.message || "").replace(/^\[הודעה קולית\]\s*/, ""); const n = now();
+    const reply = (answer, tools, extra) => new Promise(r => setTimeout(() => r(Object.assign({ ok: true, conversationId: 1, answer, tools, left: 59 }, extra || {})), 500 + Math.random() * 500));
+    let mm;
+    if (/תזכירי|תזכורת/.test(q)) {
+      const when = new Date(Date.now() + 3600e3); const hm = q.match(/ב-?(\d{1,2})(?::(\d{2}))?(?=\s|$)/); const tomorrow = /מחר/.test(q);
+      const d = new Date(n.date + "T00:00:00+02:00"); if (tomorrow) d.setDate(d.getDate() + 1); if (hm) { d.setHours(+hm[1], +(hm[2] || 0), 0, 0); if (!tomorrow && d <= new Date()) d.setDate(d.getDate() + 1); }
+      const text = q.replace(/^.*?(תזכירי לי|תזכורת)\s*/, "").replace(/\s*(מחר|היום)\s*/g, " ").replace(/\s*ב-?\d{1,2}(?::\d{2})?(?=\s|$)\s*/, " ").trim() || "תזכורת";
+      const r = { id: D.seq++, text, remindAt: (hm ? d : when).toISOString(), status: "pending" }; D.reminders.push(r);
+      return reply(`קבעתי תזכורת: "${text}" ל-${fmtDT(r.remindAt)}.`, ["now", "add_reminder"], { reminders: pending() });
+    }
+    if ((mm = q.match(/^(?:תוסיפי?|הוסיפי?)\s*לקניות:?\s*(.+)$/))) { const l = D.lists[0]; const items = mm[1].split(/[,،]| ו(?=\S)/).map(x => x.trim()).filter(Boolean); items.forEach(t => { if (!l.items.some(x => x.text === t && !x.done)) l.items.push({ id: D.seq++, text: t, qty: "", done: false, by: "דנה" }); }); return reply(`הוספתי לרשימת הקניות: ${items.join(", ")}. יש עכשיו ${l.items.filter(i => !i.done).length} פריטים.`, ["add_list_items"], { lists: listsOut() }); }
+    if ((mm = q.match(/^(?:תוסיפי?|הוסיפי?|תרשמי?|רשמי?)\s*(?:משימה:?\s*)?(.+)$/))) {
+      let title = mm[1].trim(), dueDate = ""; const days = { "ראשון": 0, "שני": 1, "שלישי": 2, "רביעי": 3, "חמישי": 4, "שישי": 5 };
+      const wd = title.match(/(?:עד|ב)?\s*יום (ראשון|שני|שלישי|רביעי|חמישי|שישי)/);
+      if (/מחר/.test(title)) { dueDate = addDays(n.date, 1); title = title.replace(/\s*(עד\s*)?מחר/, ""); }
+      else if (wd) { const cur = new Date(n.date + "T12:00:00Z").getUTCDay(); let diff = (days[wd[1]] - cur + 7) % 7 || 7; dueDate = addDays(n.date, diff); title = title.replace(wd[0], "").trim(); }
+      else if (/היום/.test(title)) { dueDate = n.date; title = title.replace(/\s*היום/, ""); }
+      const t = { id: D.seq++, title: title.replace(/\s+/g, " ").trim(), notes: "", dueDate, dueTime: "", priority: 2, status: "open" }; D.tasks.push(t);
+      return reply(`הוספתי: "${t.title}"${dueDate ? ` עד ${fmtD(dueDate)}` : ""}.`, ["now", "add_task"], { tasks: sortT() });
+    }
+    if (/רשימת הקניות|מה לקנות|מה ברשימה/.test(q)) { const l = D.lists[0].items.filter(i => !i.done); return reply(l.length ? "ברשימת הקניות:\n" + l.map(i => "• " + i.text).join("\n") : "רשימת הקניות ריקה.", ["list_items"]); }
+    if ((mm = q.match(/(?:שילמתי|יצא לי|הוצאתי)\s*(\d+)\s*(?:₪|שקל|ש"ח)?\s*(?:על|ב-?|ל)?\s*(.*)$/))) { const cat = /סופר|אוכל|מסעדה/.test(mm[2]) ? "מזון" : /דלק|רכב/.test(mm[2]) ? "רכב" : /חוג|גן/.test(mm[2]) ? "ילדים" : "אחר"; D.expenses.push({ id: D.seq++, amount: Number(mm[1]), category: cat, note: mm[2], date: n.date, by: "דנה" }); return reply(`רשמתי ${mm[1]} ₪ על ${mm[2] || "אחר"} (${cat}). החודש עד עכשיו: ${expOut().month.total} ₪.`, ["add_expense"], { expenses: expOut() }); }
+    if (/כמה הוצאתי|סיכום הוצאות|הוצאות החודש/.test(q)) { const x = expOut(); return reply(`החודש: ${x.month.total} ₪ (חודש שעבר: ${x.lastMonth.total} ₪). הכי הרבה על ${x.month.byCategory[0] ? x.month.byCategory[0].category + " — " + x.month.byCategory[0].amount + " ₪" : "—"}. השבוע: ${x.week.total} ₪.`, ["expense_summary"]); }
+    if (/תורנו|מי בתור/.test(q)) { const c = choresOut(); return reply(c.length ? c.map(x => `${x.title}: התור של ${x.turn}`).join("\n") : "אין תורנויות.", ["list_chores"]); }
+    if (/תכנני|תכנון היום|תסדרי לי את היום/.test(q)) { return reply("08:30–10:00 — להכין מבחן לט1 (עדיפות גבוהה)\n10:15–11:30 — לבדוק בחנים של ח3\n14:00 — ישיבת צוות (יומן)\n15:00 — שיחה עם אמא של נועם\n16:30 — רופא שיניים\n\nסיכום ישיבת הצוות — מחר. לפתוח את התוכנית בלשונית תדריך?", ["plan_day"]); }
+    if (/משימות|מה פתוח/.test(q)) { const open = D.tasks.filter(t => t.status === "open"); return reply(open.length ? "המשימות הפתוחות שלך:\n" + open.map(t => `• ${t.title}${t.dueDate ? ` — עד ${fmtD(t.dueDate)}` : ""}`).join("\n") : "אין משימות פתוחות.", ["list_tasks"]); }
+    if (/סיימתי|בוצע/.test(q)) { const t = D.tasks.find(x => x.status === "open" && q.includes(x.title.split(" ")[0])); if (t) { t.status = "done"; return reply(`סימנתי "${t.title}" כבוצעה. כל הכבוד.`, ["list_tasks", "update_task"], { tasks: sortT() }); } }
+    if (/יומן|אחרי בית הספר|מה יש לי|פגיש/.test(q)) { if (!D.connections.google.connected) return reply("כדי לענות על היומן האישי צריך קודם לחבר את חשבון גוגל: הגדרות ← החיבורים שלי ← חיבור גוגל.", ["list_calendar_events"]); return reply("ביומן שלך היום:\n" + D.calendar.map(e => `• ${e.start} — ${e.title}${e.location ? " · " + e.location : ""}`).join("\n") + "\n\nאחרי בית הספר: רופא שיניים ב-16:30 וחוג של נועה ב-18:00. אחרי ישיבת הצוות יש לך חלון פנוי בין 15:00 ל-16:00.", ["now", "list_calendar_events"]); }
+    if (/מייל|דוא"?ל/.test(q)) { if (!D.connections.google.connected) return reply("כדי לקרוא את המייל צריך קודם לחבר את חשבון גוגל: הגדרות ← החיבורים שלי ← חיבור גוגל.", ["search_email"]); return reply("שלושה מיילים מהיומיים האחרונים שכדאי לראות:\n• המנהל — \"סיכום ישיבת הנהלה\": מבקש מכל רכז/ת תכנית לחופשת חנוכה עד יום חמישי.\n• מזכירות — \"טיול שכבת ז\": חסרים 4 אישורי הורים מז2.\n• הורה (אמא של נועם ז2) — מבקשת לקבוע שיחה השבוע.\nלהוסיף משימה על תכנית החנוכה?", ["search_email"]); }
+    if (/שעה|תאריך|איזה יום/.test(q)) return reply(`היום יום ${n.weekday}, ${fmtD(n.date)}, השעה ${n.time}.`, ["now"]);
+    return reply("בדמו אני מזהה משימות, תזכורות, רשימת קניות, הוצאות, תורנויות, יומן ותכנון היום. נסו למשל: \"תוסיפי לקניות חלב\" או \"תוסיפי משימה לקנות מתנה עד יום חמישי\".", []);
+  }
+  return Promise.reject(new Error("לא נתמך בדמו"));
+}
+function demoData() {
+  const today = localISO(new Date());
+  const add = n => { const d = new Date(); d.setDate(d.getDate() + n); return localISO(d); };
+  const inM = n => { const d = add(-n); return d.slice(0, 7) === today.slice(0, 7) ? d : today; };   // הוצאות הדמו תמיד בחודש הנוכחי
+  const t = n => { const d = new Date(); d.setDate(d.getDate() + n); d.setHours(7, 30, 0, 0); return d.toISOString(); };
+  return {
+    seq: 100,
+    me: { email: "dana@example.com", name: "דנה", role: "platform_admin", tenant: { id: "demo", name: "נוני", plan: "full", hasTimeline: true } },
+    tasks: [
+      { id: 1, title: "להכין מבחן לט1 — פונקציות", notes: "", dueDate: add(2), dueTime: "", priority: 1, status: "open" },
+      { id: 2, title: "לבדוק בחנים של ח3", notes: "", dueDate: today, dueTime: "", priority: 2, status: "open" },
+      { id: 3, title: "להתקשר לאמא של נועם (ז2)", notes: "בעניין ההיעדרויות", dueDate: add(-1), dueTime: "16:00", priority: 2, status: "open" },
+      { id: 6, title: "לקנות מתנה ליום הולדת של סבתא", notes: "עד 150 ₪", dueDate: add(4), dueTime: "", priority: 2, status: "open" },
+      { id: 7, title: "לחדש ביטוח רכב", notes: "להשוות הצעות", dueDate: add(9), dueTime: "", priority: 1, status: "open" },
+      { id: 8, title: "לקבוע תור לרופא ילדים לנועה", notes: "", dueDate: today, dueTime: "12:00", priority: 2, status: "open" },
+      { id: 9, title: "להזמין מקום למסעדה ליום שישי", notes: "6 אנשים", dueDate: add(1), dueTime: "", priority: 3, status: "open" },
+      { id: 10, title: "לסדר את המחסן", notes: "", dueDate: "", dueTime: "", priority: 3, status: "open" },
+      { id: 4, title: "לשלוח סיכום ישיבת צוות", notes: "", dueDate: add(-3), dueTime: "", priority: 3, status: "done" },
+      { id: 11, title: "לשלם ארנונה", notes: "", dueDate: add(-2), dueTime: "", priority: 2, status: "done" },
+      { id: 12, title: "להעביר את נועה לחוג ג'ודו", notes: "", dueDate: add(-5), dueTime: "", priority: 2, status: "done" }
+    ],
+    reminders: [
+      { id: 5, text: "להביא את טפסי הטיול למזכירות", remindAt: t(1), status: "pending" },
+      { id: 13, text: "להוציא את העוגה מהמקפיא", remindAt: new Date(Date.now() + 2 * 3600e3).toISOString(), status: "pending" },
+      { id: 14, text: "להתקשר לחברת הביטוח", remindAt: t(2), status: "pending" },
+      { id: 15, text: "יום הולדת לדודה רחל — לשלוח ברכה", remindAt: t(5), status: "pending" }
+    ],
+    connections: { google: { available: true, scopes: ["calendar", "gmail"], granted: ["calendar", "gmail"], connected: true, email: "dana@example.com", status: "active", error: "" } },
+    calendar: [{ start: "08:00", title: "יום לימודים", location: "" }, { start: "14:00", title: "ישיבת צוות מתמטיקה", location: "חדר מורים" }, { start: "16:30", title: "רופא שיניים", location: "מרפאת השיניים, ראש העין" }, { start: "18:00", title: "חוג של נועה", location: "" }, { start: "20:30", title: "שיחת זום — ועד הורים", location: "" }],
+    hh: true,
+    lists: [
+      { name: "קניות", kind: "shopping", items: [{ id: 11, text: "חלב", qty: "2", done: false, by: "דנה" }, { id: 12, text: "לחם", qty: "", done: false, by: "יוסי" }, { id: 13, text: "עגבניות", qty: "ק\"ג", done: false, by: "דנה" }, { id: 17, text: "ביצים", qty: "", done: false, by: "דנה" }, { id: 18, text: "קוטג'", qty: "", done: false, by: "יוסי" }, { id: 19, text: "חיתולים מידה 4", qty: "", done: false, by: "דנה" }, { id: 20, text: "קפה", qty: "", done: false, by: "יוסי" }, { id: 14, text: "שמן זית", qty: "", done: true, by: "יוסי" }, { id: 21, text: "נייר טואלט", qty: "", done: true, by: "דנה" }] },
+      { name: "לטיול", kind: "list", items: [{ id: 15, text: "כובעים", qty: "", done: false, by: "דנה" }, { id: 16, text: "קרם הגנה", qty: "", done: false, by: "דנה" }, { id: 22, text: "מים — 6 בקבוקים", qty: "", done: false, by: "יוסי" }, { id: 23, text: "כריכים", qty: "", done: false, by: "דנה" }] },
+      { name: "לבית החדש", kind: "list", items: [{ id: 24, text: "וילונות לסלון", qty: "", done: false, by: "דנה" }, { id: 25, text: "מנורה למטבח", qty: "", done: true, by: "יוסי" }, { id: 26, text: "מדפים לחדר של נועה", qty: "", done: false, by: "יוסי" }] }
+    ],
+    chores: [
+      { id: 21, title: "להוציא זבל", people: ["דנה", "יוסי"], idx: 1, cadence: "daily", nextDate: today, lastDoneBy: "דנה" },
+      { id: 22, title: "איסוף מהגן", people: ["יוסי", "דנה"], idx: 0, cadence: "daily", nextDate: today, lastDoneBy: "" },
+      { id: 23, title: "קניות שבועיות", people: ["דנה", "יוסי"], idx: 0, cadence: "weekly", nextDate: add(3), lastDoneBy: "יוסי" },
+      { id: 27, title: "להשקות את הגינה", people: ["יוסי", "נועה", "דנה"], idx: 2, cadence: "daily", nextDate: add(-1), lastDoneBy: "נועה" },
+      { id: 28, title: "כביסה", people: ["דנה", "יוסי"], idx: 1, cadence: "weekly", nextDate: add(2), lastDoneBy: "דנה" }
+    ],
+    expenses: [
+      { id: 31, amount: 412, category: "מזון", note: "שופרסל", date: inM(1), by: "דנה" }, { id: 32, amount: 250, category: "רכב", note: "דלק", date: inM(2), by: "יוסי" },
+      { id: 33, amount: 180, category: "ילדים", note: "חוג ג'ודו", date: inM(4), by: "דנה" }, { id: 34, amount: 96, category: "מזון", note: "ירקן", date: inM(5), by: "יוסי" },
+      { id: 35, amount: 340, category: "חשבונות", note: "חשמל", date: inM(8), by: "דנה" }, { id: 36, amount: 120, category: "פנאי", note: "סרט", date: inM(9), by: "יוסי" },
+      { id: 37, amount: 58, category: "מזון", note: "בית קפה", date: inM(0), by: "דנה" }, { id: 38, amount: 230, category: "ביגוד", note: "נעליים לנועה", date: inM(3), by: "דנה" },
+      { id: 39, amount: 149, category: "חשבונות", note: "סלולר", date: inM(6), by: "יוסי" }, { id: 40, amount: 85, category: "בריאות", note: "תרופות", date: inM(7), by: "דנה" },
+      { id: 41, amount: 390, category: "מזון", note: "רמי לוי", date: inM(10), by: "יוסי" }, { id: 42, amount: 60, category: "רכב", note: "חניה", date: inM(11), by: "דנה" },
+      { id: 43, amount: 275, category: "ילדים", note: "צהרון", date: inM(12), by: "דנה" }, { id: 44, amount: 199, category: "בית", note: "חומרי ניקוי", date: inM(13), by: "יוסי" }
+    ],
+    plan: "",
+    platformRules: [{ id: 60, kind: "rule", title: "שפה וסגנון", body: "עני/ה בעברית בלבד, בקצרה ובבהירות." }, { id: 61, kind: "skill", title: "תדריך בוקר", body: "היומן של היום, משימות, תזכורות ותורנויות — בסדר הזה." }],
+    users: [{ id: 1, email: "dana@example.com", display_name: "דנה", role: "platform_admin", active: true, last_seen_at: new Date().toISOString() }, { id: 2, email: "ronit@example.com", display_name: "רונית", role: "user", active: true, last_seen_at: null }, { id: 3, email: "yael@example.com", display_name: "יעל", role: "user", active: true, last_seen_at: new Date(Date.now() - 86400e3).toISOString() }],
+
+  };
+}
+
+loadConfig().then(boot);
+</script>
+</body>
+</html>
