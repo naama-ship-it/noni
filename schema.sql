@@ -271,3 +271,15 @@ CREATE INDEX IF NOT EXISTS noni_expense_h ON noni_expense (household_id, spent_o
 -- שיתוף רשימה בקישור (2026-11-02): אסימון אקראי לכל רשימה; מי שיש לו את הקישור רואה את הרשימה
 -- ומסמן/מוחק פריטים בלי כניסה. ביטול השיתוף = NULL.
 ALTER TABLE noni_list ADD COLUMN IF NOT EXISTS share_token TEXT UNIQUE;
+
+-- ---- נוני: קישור טלגרם (צ'אט אחד לכל משתמש/ת) ----
+CREATE TABLE IF NOT EXISTS noni_tg (
+  user_id       BIGINT PRIMARY KEY REFERENCES ast_user(id) ON DELETE CASCADE,
+  chat_id       TEXT UNIQUE,                     -- NULL עד הקישור
+  username      TEXT NOT NULL DEFAULT '',
+  code          TEXT UNIQUE,                     -- קוד חד-פעמי לקישור t.me/<bot>?start=<code>
+  code_at       TIMESTAMPTZ,
+  linked_at     TIMESTAMPTZ,
+  created_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at    TIMESTAMPTZ NOT NULL DEFAULT now()
+);
