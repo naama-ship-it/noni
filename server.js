@@ -67,7 +67,11 @@ const WA_PHONE_ID = process.env.WA_PHONE_ID || "";           // Phone number ID 
 const WA_VERIFY_TOKEN = process.env.WA_VERIFY_TOKEN || "";   // מחרוזת לאימות ה-webhook
 const WA_APP_SECRET = process.env.WA_APP_SECRET || "";       // לאימות חתימת הבקשות (X-Hub-Signature-256)
 const WA_DISPLAY_NUMBER = process.env.WA_DISPLAY_NUMBER || "";   // המספר להצגה למשתמשים, למשל +972-50-000-0000
-const WA_TEMPLATE_REMINDER = process.env.WA_TEMPLATE_REMINDER || "";   // תבנית מאושרת לתזכורת מחוץ לחלון 24 השעות (פרמטר אחד)
+const WA_TEMPLATE_REMINDER = process.env.WA_TEMPLATE_REMINDER || "";
+const TWILIO_SID = process.env.TWILIO_ACCOUNT_SID || "";       // SMS — Twilio (Secret Manager)
+const TWILIO_TOKEN = process.env.TWILIO_AUTH_TOKEN || "";
+const TWILIO_FROM = process.env.TWILIO_FROM || "";             // +1… / Alphanumeric Sender ID / MG… (Messaging Service)
+const smsReady = () => !!(TWILIO_SID && TWILIO_TOKEN && TWILIO_FROM);   // תבנית מאושרת לתזכורת מחוץ לחלון 24 השעות (פרמטר אחד)
 const CRON_KEY = process.env.CRON_KEY || "";
 const CANON_HOST = (process.env.CANONICAL_HOST || "noni.timeline-school.com").toLowerCase();                 // Cloud Scheduler שולח X-Cron-Key
 const SCOPE_URLS = { calendar: "https://www.googleapis.com/auth/calendar.readonly", gmail: "https://www.googleapis.com/auth/gmail.readonly" };
@@ -501,7 +505,7 @@ async function connectionsOut(u) {
   const g = r.rows.find(x => x.provider === "google");
   const granted = GOOGLE_SCOPES.filter(sc => g && new RegExp(sc === "gmail" ? "gmail" : "calendar").test(g.scopes || ""));
   const ic = r.rows.find(x => x.provider === "ics");
-  return { ics: { available: !!CONN_KEY, connected: !!ic, label: ic ? ic.account_email : "", error: ic ? ic.last_error : "", since: ic ? ic.updated_at : null },
+  return { sms: await smsOut(u), ics: { available: !!CONN_KEY, connected: !!ic, label: ic ? ic.account_email : "", error: ic ? ic.last_error : "", since: ic ? ic.updated_at : null },
     google: { available: googleReady(), scopes: GOOGLE_SCOPES, granted, connected: !!g && g.status === "active", email: g ? g.account_email : "", status: g ? g.status : "none", error: g ? g.last_error : "", since: g ? g.updated_at : null } };
 }
 async function googleAccessToken(u) {
@@ -890,21 +894,44 @@ async function channelChat(u, text, channel, title) {
   await log(u.tenant_id, u.email, channel + ".chat", r.used.join(","));
   return r.answer;
 }
+/* ============================================================
+   SMS — Twilio REST API (fetch בלבד). בלי משתני סביבה — כבוי בשקט.
+   ============================================================ */
+async function smsSend(to, text) {
+  if (!smsReady()) throw new Error("SMS לא מוגדר");
+  const body = new URLSearchParams({ To: "+" + String(to).replace(/^\+/, ""), Body: String(text).slice(0, 1200) });
+  if (/^MG[0-9a-f]{32}$/i.test(TWILIO_FROM)) body.set("MessagingServiceSid", TWILIO_FROM); else body.set("From", TWILIO_FROM);
+  const r = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${encodeURIComponent(TWILIO_SID)}/Messages.json`, {
+    method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded", Authorization: "Basic " + Buffer.from(TWILIO_SID + ":" + TWILIO_TOKEN).toString("base64") }, body });
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error("Twilio " + r.status + ": " + String(j.message || j.code || "").slice(0, 160));
+  return j.sid;
+}
+async function smsOut(u) {
+  const r = await pool.query(`SELECT phone, verified_at, code FROM noni_sms WHERE user_id=$1`, [u.id]);
+  const w = r.rows[0];
+  return { available: smsReady(), phone: w ? w.phone : "", verified: !!(w && w.verified_at), pending: !!(w && !w.verified_at && w.code) };
+}
+
 /* תזכורות יוצאות — Cloud Scheduler כל דקה: POST /api/cron/reminders עם X-Cron-Key */
 async function cronReminders() {
-  const r = await pool.query(`SELECT r.id, r.text, r.user_id, w.phone FROM ast_reminder r
+  const r = await pool.query(`SELECT r.id, r.text, r.user_id, w.phone, s.phone AS sms_phone FROM ast_reminder r
                               LEFT JOIN noni_wa w ON w.user_id=r.user_id AND w.verified_at IS NOT NULL
-                              WHERE r.status='pending' AND r.remind_at <= now() AND w.phone IS NOT NULL ORDER BY r.remind_at LIMIT 50`);
+                              LEFT JOIN noni_sms s ON s.user_id=r.user_id AND s.verified_at IS NOT NULL
+                              WHERE r.status='pending' AND r.remind_at <= now() AND (w.phone IS NOT NULL OR s.phone IS NOT NULL) ORDER BY r.remind_at LIMIT 50`);
   let sent = 0;
   for (const x of r.rows) {
     try {
       const txt = "תזכורת: " + x.text;
       let okAny = false, lastErr = null;
-      if (x.phone && WA_PHONE_ID) {
+      if (x.sms_phone && smsReady()) {   // ערוץ ראשי: SMS
+        try { await smsSend(x.sms_phone, "נוני · " + txt); okAny = true; } catch (e) { lastErr = e; }
+      }
+      if (!okAny && x.phone && WA_PHONE_ID) {   // חלופה: ווטסאפ
         try { try { await waSend(x.phone, txt); } catch (e) { if (WA_TEMPLATE_REMINDER) await waSendTemplate(x.phone, WA_TEMPLATE_REMINDER, x.text); else throw e; } okAny = true; }   // מחוץ לחלון 24 השעות — תבנית
         catch (e) { lastErr = e; }
       }
-      if (!okAny) throw lastErr || new Error("אין ערוץ זמין");
+      if (!okAny) { if (lastErr) throw lastErr; continue; }   // אין ערוץ מוגדר — נשאר ממתין
       await pool.query(`UPDATE ast_reminder SET status='sent', sent_at=now() WHERE id=$1`, [x.id]);
       sent++;
     } catch (e) { console.error("cron reminder", x.id, String(e.message || e).slice(0, 160)); }
@@ -1199,7 +1226,7 @@ const server = http.createServer(async (req, res) => {
     }
   }
   try {
-    if (p === "/api/health") return json(res, 200, { ok: true, version: VERSION, provider: LLM_PROVIDER, model: LLM_PROVIDER === "gemini" ? GEMINI_MODEL : MODEL, region: LLM_PROVIDER === "gemini" ? GEMINI_REGION : VERTEX_REGION, auth: AUTH_MODE, db: !!process.env.DB_HOST || !!process.env.DB_SOCKET, google: googleReady(), googleScopes: GOOGLE_SCOPES, whatsapp: !!WA_PHONE_ID, ics: true });
+    if (p === "/api/health") return json(res, 200, { ok: true, version: VERSION, provider: LLM_PROVIDER, model: LLM_PROVIDER === "gemini" ? GEMINI_MODEL : MODEL, region: LLM_PROVIDER === "gemini" ? GEMINI_REGION : VERTEX_REGION, auth: AUTH_MODE, db: !!process.env.DB_HOST || !!process.env.DB_SOCKET, google: googleReady(), googleScopes: GOOGLE_SCOPES, whatsapp: !!WA_PHONE_ID, sms: smsReady(), ics: true });
     if (p.startsWith("/l/")) return serveStatic(req, res, "/list.html");
     if (!p.startsWith("/api/")) return serveStatic(req, res, p);
     if (p === "/api/config" && req.method === "GET") return json(res, 200, { ok: true, googleClientId: GOOGLE_CLIENT_ID, auth: AUTH_MODE, whatsapp: !!WA_PHONE_ID, waNumber: WA_DISPLAY_NUMBER });
@@ -1246,6 +1273,38 @@ const server = http.createServer(async (req, res) => {
     if (u.tenant_active === false || u.active === false) return json(res, 403, { ok: false, error: "החשבון אינו פעיל." });
 
     const me = () => ({ email: u.email, name: u.display_name, role: u.role, tenant: { id: u.tenant_id, name: u.tenant_name, plan: u.plan } });
+
+    /* ---- SMS: מספר טלפון לתזכורות (אימות בקוד) ---- */
+    if (p === "/api/sms" && req.method === "POST") {
+      if (!smsReady()) return json(res, 503, { ok: false, error: "SMS עדיין לא הופעל בשרת." });
+      const b = await readBody(req); const phone = normPhone(str(b.phone, 30));
+      if (!phone) return json(res, 400, { ok: false, error: "מספר טלפון לא תקין. למשל 050-1234567 או +972501234567." });
+      const prev = (await pool.query(`SELECT code_at FROM noni_sms WHERE user_id=$1`, [u.id])).rows[0];
+      if (prev && prev.code_at && Date.now() - new Date(prev.code_at) < 30000) return json(res, 429, { ok: false, error: "רגע, קוד נשלח עכשיו. נסי שוב בעוד חצי דקה." });
+      const code = String(crypto.randomInt(100000, 999999));
+      try { await smsSend(phone, `קוד האימות של נוני: ${code}`); } catch (e) { console.error("sms code", String(e.message).slice(0, 160)); return json(res, 502, { ok: false, error: "לא הצלחתי לשלוח מסרון למספר הזה." }); }
+      await pool.query(`INSERT INTO noni_sms (user_id, phone, code, code_at, attempts, verified_at) VALUES ($1,$2,$3,now(),0,NULL)
+        ON CONFLICT (user_id) DO UPDATE SET phone=$2, code=$3, code_at=now(), attempts=0, verified_at=NULL, updated_at=now()`, [u.id, phone, code]);
+      await log(u.tenant_id, u.email, "sms.code", phone.slice(-4));
+      return json(res, 200, { ok: true, connections: await connectionsOut(u) });
+    }
+    if (p === "/api/sms/verify" && req.method === "POST") {
+      const b = await readBody(req); const code = str(b.code, 10).replace(/\D/g, "");
+      const w = (await pool.query(`SELECT code, code_at, attempts FROM noni_sms WHERE user_id=$1`, [u.id])).rows[0];
+      if (!w || !w.code) return json(res, 400, { ok: false, error: "אין קוד ממתין. שלחי קוד חדש." });
+      if (w.attempts >= 5 || Date.now() - new Date(w.code_at) > 15 * 60000) return json(res, 400, { ok: false, error: "הקוד פג. שלחי קוד חדש." });
+      if (code !== w.code) { await pool.query(`UPDATE noni_sms SET attempts=attempts+1 WHERE user_id=$1`, [u.id]); return json(res, 400, { ok: false, error: "הקוד שגוי." }); }
+      await pool.query(`UPDATE noni_sms SET code=NULL, verified_at=now(), updated_at=now() WHERE user_id=$1`, [u.id]);
+      await log(u.tenant_id, u.email, "sms.verified", "");
+      return json(res, 200, { ok: true, connections: await connectionsOut(u) });
+    }
+    if (p === "/api/sms/test" && req.method === "POST") {
+      const w = (await pool.query(`SELECT phone FROM noni_sms WHERE user_id=$1 AND verified_at IS NOT NULL`, [u.id])).rows[0];
+      if (!w || !smsReady()) return json(res, 400, { ok: false, error: "אין מספר מאומת." });
+      try { await smsSend(w.phone, "נוני: זו הודעת בדיקה — התזכורות יגיעו לכאן 🙂"); } catch (e) { return json(res, 502, { ok: false, error: "השליחה נכשלה." }); }
+      return json(res, 200, { ok: true });
+    }
+    if (p === "/api/sms" && req.method === "DELETE") { await pool.query(`DELETE FROM noni_sms WHERE user_id=$1`, [u.id]); await log(u.tenant_id, u.email, "sms.remove", ""); return json(res, 200, { ok: true, connections: await connectionsOut(u) }); }
 
     /* ---- ווטסאפ: קישור המספר ---- */
     if (p === "/api/wa/link" && req.method === "GET") return json(res, 200, { ok: true, link: await waLinkOut(u) });

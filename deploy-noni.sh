@@ -95,6 +95,10 @@ s_deploy() {
   SQL_IP=$(gcloud sql instances describe "$SQL_INSTANCE" --format='value(ipAddresses[0].ipAddress)')
   SECRETS="DB_PASS=noni-db-pass:latest,SESSION_SECRET=noni-session-secret:latest,CRON_KEY=noni-cron-key:latest,CONN_KEY=noni-conn-key:latest"
   gcloud secrets describe noni-google-client-id >/dev/null 2>&1 && SECRETS="$SECRETS,GOOGLE_CLIENT_ID=noni-google-client-id:latest,GOOGLE_CLIENT_SECRET=noni-google-client-secret:latest"
+  # SMS (Twilio) — רק אם שלושת הסודות קיימים
+  if gcloud secrets describe noni-twilio-sid >/dev/null 2>&1 && gcloud secrets describe noni-twilio-token >/dev/null 2>&1 && gcloud secrets describe noni-twilio-from >/dev/null 2>&1; then
+    SECRETS="$SECRETS,TWILIO_ACCOUNT_SID=noni-twilio-sid:latest,TWILIO_AUTH_TOKEN=noni-twilio-token:latest,TWILIO_FROM=noni-twilio-from:latest"
+  fi
   WA_ENV=""
   if gcloud secrets describe noni-wa-token >/dev/null 2>&1; then
     SECRETS="$SECRETS,WA_TOKEN=noni-wa-token:latest,WA_APP_SECRET=noni-wa-app-secret:latest,WA_VERIFY_TOKEN=noni-wa-verify:latest"

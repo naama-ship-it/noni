@@ -272,3 +272,15 @@ CREATE INDEX IF NOT EXISTS noni_expense_h ON noni_expense (household_id, spent_o
 -- ומסמן/מוחק פריטים בלי כניסה. ביטול השיתוף = NULL.
 ALTER TABLE noni_list ADD COLUMN IF NOT EXISTS share_token TEXT UNIQUE;
 
+
+-- ---- נוני: SMS (Twilio) — מספר לתזכורות, מאומת בקוד חד-פעמי ----
+CREATE TABLE IF NOT EXISTS noni_sms (
+  user_id       BIGINT PRIMARY KEY REFERENCES ast_user(id) ON DELETE CASCADE,
+  phone         TEXT NOT NULL,                   -- ספרות בלבד, עם קידומת מדינה (972…)
+  code          TEXT,                            -- קוד אימות; NULL אחרי אימות
+  code_at       TIMESTAMPTZ,
+  attempts      INT NOT NULL DEFAULT 0,
+  verified_at   TIMESTAMPTZ,
+  created_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at    TIMESTAMPTZ NOT NULL DEFAULT now()
+);
