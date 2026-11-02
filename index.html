@@ -6,8 +6,8 @@
 <meta name="robots" content="noindex">
 <meta name="theme-color" content="#0b0a0e">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'%3E%3Cpath d='M60 10c28 0 50 20 50 46 0 26-22 46-50 46-6 0-12-1-17-3L18 108l5-22C14 78 10 67 10 56 10 30 32 10 60 10z' fill='%23ff2d9a'/%3E%3Cpath d='M40 76V44l40 32V44' fill='none' stroke='%23fff' stroke-width='9' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
-<link rel="manifest" href="/manifest.webmanifest">
-<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Noni">
@@ -216,7 +216,7 @@ th{color:var(--muted);font-weight:500;border-top:0}
       <p style="margin:0 0 4px;font-weight:700">העוזרת האישית שלך — באתר ובווטסאפ</p>
       <p class="muted" style="margin:0 0 14px">משימות ותזכורות, רשימת קניות משותפת, תורנויות, מעקב הוצאות, יומן ומייל ותכנון היום. שולחים הודעה, קול או צילום קבלה — באתר ובווטסאפ. נכנסים עם חשבון Google, בלי סיסמה.</p>
       <div id="gsiBtn" style="display:flex;justify-content:center"></div>
-      <p class="muted" style="margin-top:12px;font-size:12px">בהרשמה מאשרים את <a href="/privacy.html">מדיניות הפרטיות</a>. חינם בתקופת הפיילוט.</p>
+      <p class="muted" style="margin-top:12px;font-size:12px">בהרשמה מאשרים את <a href="./privacy.html">מדיניות הפרטיות</a>. חינם בתקופת הפיילוט.</p>
       <p class="muted" style="margin-top:6px;font-size:11.5px">© כל הזכויות שמורות לנעמה אורפלי</p>
     </div>
     <div id="msgs" role="log" aria-live="polite" aria-label="השיחה עם נוני"></div>
@@ -330,7 +330,7 @@ th{color:var(--muted);font-weight:500;border-top:0}
       <button class="btn primary" id="installBtn">התקנה על המסך הראשי</button>
     </div>
     <p class="muted" id="verInfo" style="text-align:center"></p>
-    <p class="muted" style="text-align:center;font-size:12px;margin-top:-6px">נוני · <a href="/privacy.html" style="color:var(--mod);text-decoration:none">מדיניות הפרטיות</a> · © כל הזכויות שמורות לנעמה אורפלי</p>
+    <p class="muted" style="text-align:center;font-size:12px;margin-top:-6px">נוני · <a href="./privacy.html" style="color:var(--mod);text-decoration:none">מדיניות הפרטיות</a> · © כל הזכויות שמורות לנעמה אורפלי</p>
   </section>
 
 </div>
@@ -867,7 +867,7 @@ $("#installClose").onclick = () => hideInstall(true);
 $("#installSheet").addEventListener("click", e => { if (e.target === $("#installSheet")) hideInstall(true); });
 $("#installBtn").onclick = () => showInstall(true);
 document.addEventListener("keydown", e => { if (e.key === "Escape" && !$("#installSheet").classList.contains("hidden")) hideInstall(true); });
-if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost")) window.addEventListener("load", () => navigator.serviceWorker.register("/sw.js").catch(() => {}));
+if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost")) window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js").catch(() => {}));
 
 /* ---------- אתחול ---------- */
 function updateWho() { $("#who").innerHTML = `<b>${esc(state.me.name)}</b>${esc(state.me.email)}`; }
