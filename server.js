@@ -959,7 +959,7 @@ async function systemPrompt(u) {
   lines.push("");
   lines.push("## כלים");
   lines.push("הודעה שמתחילה ב-[הודעה קולית] היא תמלול של הקלטה: הבן/י את הכוונה ופעל/י ישירות (למשל 'שילמתי ארבעים שקל על קפה' ← add_expense; 'תוסיפי לקניות' ← add_list_items; 'תזכירי לי' ← add_reminder; 'מחר אני צריכה' ← add_task), ואשר/י בקצרה מה נרשם ואיפה.");
-  lines.push("משימות, תזכורות, פריטי רשימה, תורנויות והוצאות נשמרים דרך הכלים בלבד — אל תאמר/י 'רשמתי' בלי שהכלי הופעל והחזיר הצלחה. 'תוסיפי לקניות חלב ולחם' = add_list_items. 'שילמתי 120 בסופר' / 'יצא לי 80 על דלק' = add_expense (הקטגוריה לפי ההקשר). 'קניתי את החלב' = check_list_items. 'מי בתור להוציא זבל' = list_chores. תכנון היום = plan_day ואז לוח זמנים מוצע. ליומן האישי ולמייל — list_calendar_events / search_email / read_email; אם מוחזר needs-google — הפנ/י להגדרות ← חיבורים, בלי לנסות שוב. אל תסכם/י מייל שלא נקרא בפועל בכלי.");
+  lines.push("משימות, תזכורות, פריטי רשימה, תורנויות והוצאות נשמרים דרך הכלים בלבד — אל תאמר/י 'רשמתי' בלי שהכלי הופעל והחזיר הצלחה. 'תוסיפי לקניות חלב ולחם' = add_list_items. 'שילמתי 120 בסופר' / 'יצא לי 80 על דלק' = add_expense (הקטגוריה לפי ההקשר). 'קניתי את החלב' = check_list_items. 'מי בתור להוציא זבל' = list_chores. תכנון היום = plan_day ואז לוח זמנים מוצע. ליומן האישי — list_calendar_events" + (GOOGLE_SCOPES.includes("gmail") ? "; למייל — search_email / read_email" : "; אין גישה למייל — אם מבקשים, הסבר/י בעדינות שנוני לא מחוברת למייל") + "; אם מוחזר needs-google — הפנ/י להגדרות ← חיבורים, בלי לנסות שוב. אל תסכם/י מייל שלא נקרא בפועל בכלי.");
   lines.push("תשובות קצרות, בעברית, בלי כותרות מיותרות. רשימות — רק כשיש כמה פריטים. אל תחזור/תחזרי על השאלה.");
   return lines.join("\n");
 }
@@ -982,7 +982,7 @@ async function callModel(system, messages) {
   if (LLM_PROVIDER === "gemini") return geminiModel(system, messages);
   // היסטוריה שנוצרה עם gemini עשויה לשאת שדה sig בבלוקי tool_use — Claude לא מכיר אותו
   messages = messages.map(m => Array.isArray(m.content) ? { ...m, content: m.content.map(c => { if (c && c.sig) { const { sig, ...rest } = c; return rest; } return c; }) } : m);
-  const body = { max_tokens: 1200, system, messages, tools: TOOLS, temperature: 0.2 };
+  const body = { max_tokens: 1200, system, messages, tools: TOOLS.filter(t => GOOGLE_SCOPES.includes("gmail") || !/_email$/.test(t.name)), temperature: 0.2 };
   let url, headers;
   if (LLM_PROVIDER === "vertex") {
     if (!VERTEX_PROJECT) throw new Error("חסר VERTEX_PROJECT");
