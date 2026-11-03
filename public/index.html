@@ -706,10 +706,7 @@ function renderConnections() {
   else if (g.connected) { status = `<span class="ok">מחובר · ${esc(g.email)}</span>`; action = `<button class="btn sm" data-act="gdisc">ניתוק</button>`; }
   else if (g.status === "revoked" || g.status === "error") { status = `<span style="color:var(--err)">החיבור פג${g.error ? " — " + esc(g.error).slice(0, 60) : ""}</span>`; action = `<button class="btn sm primary" data-act="gconn">חיבור מחדש</button>`; }
   else { status = "<span>לא מחובר</span>"; action = `<button class="btn sm primary" data-act="gconn">חיבור גוגל</button>`; }
-  const wished = state.wishes || {};
-  const soon = CONNECTORS.map(k => `<div class="conn soon"><span class="ic">${k.icon}</span><div class="t"><b>${k.name}</b><span>${k.desc}</span></div>${wished[k.id] ? `<span class="pill mod">נרשמת</span>` : `<button class="btn sm" data-act="wish" data-p="${k.id}">רוצה את זה</button>`}</div>`).join("");
-  $("#connList").innerHTML = `<div class="conn"><span class="ic">${GICON}</span><div class="t"><b>גוגל — ${what}</b>${status}</div>${action}</div>${icsCard(c.ics)}${smsCard(c.sms)}
-    <div class="muted" style="margin:12px 0 4px;font-size:12.5px">בקרוב — סמני מה חשוב לך ונעדכן כשזה מוכן:</div>${soon}`;
+  $("#connList").innerHTML = `<div class="conn"><span class="ic">${GICON}</span><div class="t"><b>גוגל — ${what}</b>${status}</div>${action}</div>${icsCard(c.ics)}${smsCard(c.sms)}`;
 }
 /* יומן ICS — חיבור אמיתי */
 const ICON_ICS = '<svg class="i" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4M8 14h3M13 14h3M8 18h3"/></svg>';
@@ -732,18 +729,9 @@ function smsCard(x) {
   return `<div class="conn" style="flex-wrap:wrap">${head}<span>מספר טלפון לקבלת תזכורות. נשלח קוד אימות.</span></div>
     <div class="row multi" style="flex-basis:100%"><input type="tel" id="smsPhone" placeholder="050-1234567" dir="ltr" style="flex:1 1 180px;width:auto;text-align:left"><button class="btn sm primary" data-act="smssend">שליחת קוד</button></div></div>`;
 }
-/* חיבורים מתוכננים (קטלוג בלבד — הצבעה, לא חיבור בפועל) */
-const CONNECTORS = [
-  { id: "microsoft", name: "מיקרוסופט 365 — יומן ומייל (Outlook)", desc: "לחשבון עבודה או ארגוני", icon: '<svg class="i" viewBox="0 0 24 24"><rect x="3" y="3" width="8" height="8" rx="1"/><rect x="13" y="3" width="8" height="8" rx="1"/><rect x="3" y="13" width="8" height="8" rx="1"/><rect x="13" y="13" width="8" height="8" rx="1"/></svg>' },
-  { id: "tasks", name: "רשימות משימות — Google Tasks / Todoist", desc: "סנכרון דו-כיווני של המשימות", icon: '<svg class="i" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>' },
-  { id: "notion", name: "Notion", desc: "לקרוא ולכתוב בדפים ובמאגרים שלך", icon: '<svg class="i" viewBox="0 0 24 24"><path d="M4 4h16v16H4z"/><path d="M8 16V8l8 8V8"/></svg>' },
-  { id: "slack", name: "Slack", desc: "תזכורות וסיכומים לערוץ שלך", icon: '<svg class="i" viewBox="0 0 24 24"><path d="M8 3v6M16 15v6M3 16h6M15 8h6"/><circle cx="8" cy="12" r="2"/><circle cx="16" cy="12" r="2"/><circle cx="12" cy="8" r="2"/><circle cx="12" cy="16" r="2"/></svg>' },
-  { id: "drive", name: "Google Drive", desc: "לשאול על קבצים ומסמכים", icon: '<svg class="i" viewBox="0 0 24 24"><path d="M8 4h8l6 10-4 6H6l-4-6z"/><path d="M8 4l4 10h10M6 20l6-6"/></svg>' },
-];
 $("#connList").addEventListener("click", async e => {
   const b = e.target.closest("button[data-act]"); if (!b) return;
   if (b.dataset.act === "gconn") { if (DEMO) { state.connections.google.connected = true; state.connections.google.email = "dana@example.com"; renderConnections(); toast("בדמו: גוגל חובר"); return; } location.href = "/api/connect/google"; return; }
-  if (b.dataset.act === "wish") { const pid = b.dataset.p; state.wishes = state.wishes || {}; state.wishes[pid] = true; renderConnections(); toast("נרשם — נודיע לך כשהחיבור יהיה מוכן"); if (!DEMO) { try { await api("POST", "/api/connect/wish", { provider: pid }); } catch (e) {} } return; }
   if (b.dataset.act === "icsconn") { const url = $("#icsUrl").value.trim(); if (!url) return $("#icsUrl").focus(); if (DEMO) { state.connections.ics = { available: true, connected: true, label: "iCloud" }; renderConnections(); toast("בדמו: היומן חובר"); return; } b.disabled = true; b.textContent = "בודקת…"; try { const r = await api("POST", "/api/connect/ics", { url }); state.connections = r.connections; renderConnections(); toast(`היומן חובר (${r.count} אירועים)`); } catch (err) { toast(err.message); b.disabled = false; b.textContent = "חיבור"; } return; }
   if (b.dataset.act.startsWith("sms")) {
     const a = b.dataset.act;
