@@ -544,6 +544,7 @@ $("#briefGo").onclick = async () => {
     const today = r.now.date;
     let h = "";
     if (r.calendar) h += `<h3>היומן האישי</h3>` + (r.calendar.error ? `<p class="muted">${esc(r.calendar.error)}</p>` : r.calendar.length ? `<ul>${r.calendar.map(e => `<li>${esc(e.start)} — ${esc(e.title)}${e.location ? " · " + esc(e.location) : ""}</li>`).join("")}</ul>` : `<p class="muted">אין אירועים ביומן היום.</p>`);
+    if (r.bereshet) { const bd = (x, label) => !x ? "" : x.error ? `<p class="muted">${esc(x.error)}</p>` : `<p><b>${label}</b>${x.lessons.length ? "" : " — אין שיעורים"}</p>${x.lessons.length ? `<ul>${x.lessons.map(l => `<li>${esc(l.time || "שיעור " + l.p)} — ${esc(l.subject)}${l.classes ? " · " + esc(l.classes) : ""}${l.teacher ? " · " + esc(l.teacher) : ""}${l.room ? " · חדר " + esc(l.room) : ""}</li>`).join("")}</ul>` : ""}${(x.changes.length || x.away.length || x.special) ? `<p><b>שינויים:</b></p><ul>${x.changes.map(c => `<li class="overdue">שיעור ${c.p}${c.time ? " (" + esc(c.time) + ")" : ""} ${esc(c.subject)}${c.classes ? " · " + esc(c.classes) : ""}: ${esc(c.what)}${c.by ? " — " + esc(c.by) : ""}</li>`).join("")}${x.away.map(a => `<li>${esc(a.class)}: ${esc(a.note)}</li>`).join("")}${x.special ? `<li>${esc(x.special)}</li>` : ""}</ul>` : `<p class="muted">אין שינויים.</p>`}`; h += `<h3>בראשית</h3>` + bd(r.bereshet.today, "היום") + bd(r.bereshet.tomorrow, "מחר"); }
     h += `<h3>משימות להיום${r.tasks.some(t => t.dueDate < today) ? " (כולל שעבר מועדן)" : ""}</h3>` + (r.tasks.length ? `<ul>${r.tasks.map(t => `<li>${esc(t.title)}${t.dueDate && t.dueDate < today ? ` <span class="overdue">(מ-${fmtD(t.dueDate)})</span>` : ""}${t.dueTime ? " · " + t.dueTime : ""}</li>`).join("")}</ul>` : `<p class="muted">אין משימות להיום.</p>`);
     h += `<h3>תזכורות קרובות</h3>` + (r.reminders.length ? `<ul>${r.reminders.map(x => `<li>${esc(x.text)} · ${fmtDT(x.remindAt)}</li>`).join("")}</ul>` : `<p class="muted">אין תזכורות ב-36 השעות הקרובות.</p>`);
     if (r.mail) h += `<h3>מיילים שמחכים</h3>` + (r.mail.error === "needs-gmail-scope" ? `<p class="muted">כדי לראות מיילים חשובים בתדריך צריך לחבר מחדש את גוגל ולאשר גישה למייל (הגדרות ← החיבורים שלי).</p>` : r.mail.error ? `<p class="muted">${esc(r.mail.error)}</p>` : r.mail.length ? `<ul>${r.mail.map(m => `<li>${esc(m.subject)} <span class="muted">· ${esc(String(m.from).replace(/<.*>/, "").trim())}</span></li>`).join("")}</ul>` : `<p class="muted">אין מיילים חדשים שדורשים תשומת לב.</p>`);
@@ -706,7 +707,25 @@ function renderConnections() {
   else if (g.connected) { status = `<span class="ok">מחובר · ${esc(g.email)}</span>`; action = `<button class="btn sm" data-act="gdisc">ניתוק</button>`; }
   else if (g.status === "revoked" || g.status === "error") { status = `<span style="color:var(--err)">החיבור פג${g.error ? " — " + esc(g.error).slice(0, 60) : ""}</span>`; action = `<button class="btn sm primary" data-act="gconn">חיבור מחדש</button>`; }
   else { status = "<span>לא מחובר</span>"; action = `<button class="btn sm primary" data-act="gconn">חיבור גוגל</button>`; }
-  $("#connList").innerHTML = `<div class="conn"><span class="ic">${GICON}</span><div class="t"><b>גוגל — ${what}</b>${status}</div>${action}</div>${icsCard(c.ics)}${smsCard(c.sms)}`;
+  $("#connList").innerHTML = `<div class="conn"><span class="ic">${GICON}</span><div class="t"><b>גוגל — ${what}</b>${status}</div>${action}</div>${berCard(c.bereshet)}${icsCard(c.ics)}${smsCard(c.sms)}`;
+  if (c.bereshet && !c.bereshet.connected) loadBerClasses();
+}
+/* בראשית — מערכת שעות ושינויים (קוד מורה אישי או כיתה) */
+const ICON_BER = '<svg class="i" viewBox="0 0 24 24"><path d="M3 10l9-6 9 6-9 6z"/><path d="M7 12.5V17c3 2 7 2 10 0v-4.5"/></svg>';
+let berClasses = null;
+async function loadBerClasses() {
+  const sel = $("#berClass"); if (!sel) return;
+  if (!berClasses) { try { berClasses = DEMO ? [{ id: "c1", name: "ח2" }] : (await api("GET", "/api/bereshet/classes")).classes; } catch (e) { berClasses = []; } }
+  sel.innerHTML = '<option value="">בחירת כיתה…</option>' + berClasses.map(c => `<option value="${esc(c.id)}">${esc(c.name)}</option>`).join("");
+}
+function berCard(x) {
+  x = x || { available: false };
+  const head = `<span class="ic">${ICON_BER}</span><div class="t"><b>בראשית — מערכת שעות ושינויים</b>`;
+  if (!x.available) return "";
+  if (x.connected) return `<div class="conn">${head}<span class="ok">מחובר · ${x.kind === "code" ? "מורה: " : "כיתה "}${esc(x.label)}</span>${x.error ? `<span style="color:var(--err)">${esc(x.error).slice(0, 90)}</span>` : "<span>השיעורים והשינויים של היום ומחר מופיעים בתדריך ובתכנון היום; שינויים חדשים נשלחים במסרון (אם SMS מחובר)</span>"}</div><button class="btn sm" data-act="berdel">הסרה</button></div>`;
+  return `<div class="conn" style="flex-wrap:wrap">${head}<span>מורה — הזיני את קוד המורה האישי שלך מבראשית. תלמיד/ה או הורה — בחרו כיתה, בלי קוד. קריאה בלבד; הקוד נשמר מוצפן בשרת ולא מוצג שוב.</span></div>
+    <div class="row multi" style="flex-basis:100%"><input type="password" id="berCode" autocomplete="off" placeholder="קוד מורה" dir="ltr" style="flex:1 1 160px;width:auto;text-align:left"><button class="btn sm primary" data-act="bercode">חיבור עם קוד</button></div>
+    <div class="row multi" style="flex-basis:100%"><select id="berClass" style="flex:1 1 160px;width:auto"><option value="">טוען כיתות…</option></select><button class="btn sm" data-act="bercls">חיבור לכיתה</button></div></div>`;
 }
 /* יומן ICS — חיבור אמיתי */
 const ICON_ICS = '<svg class="i" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4M8 14h3M13 14h3M8 18h3"/></svg>';
@@ -744,6 +763,17 @@ $("#connList").addEventListener("click", async e => {
       if (a === "smsdel") { if (!confirm("להסיר את המספר?")) return; r = await api("DELETE", "/api/sms"); toast("הוסר"); }
       if (r && r.connections) { state.connections = r.connections; renderConnections(); }
     } catch (err) { toast(err.message); b.disabled = false; }
+    return;
+  }
+  if (b.dataset.act.startsWith("ber")) {
+    const a = b.dataset.act;
+    try {
+      let r;
+      if (a === "bercode") { const code = $("#berCode").value.trim(); if (!code) return $("#berCode").focus(); b.disabled = true; b.textContent = "בודקת…"; r = await api("POST", "/api/bereshet", { code }); toast("בראשית חוברה"); }
+      if (a === "bercls") { const classId = $("#berClass").value; if (!classId) return $("#berClass").focus(); b.disabled = true; r = await api("POST", "/api/bereshet", { classId }); toast("בראשית חוברה"); }
+      if (a === "berdel") { if (!confirm("להסיר את החיבור לבראשית (כולל הקוד)?")) return; r = await api("DELETE", "/api/bereshet"); toast("הוסר"); }
+      if (r && r.connections) { state.connections = r.connections; renderConnections(); }
+    } catch (err) { toast(err.message); b.disabled = false; b.textContent = a === "bercode" ? "חיבור עם קוד" : a === "bercls" ? "חיבור לכיתה" : "הסרה"; }
     return;
   }
   if (b.dataset.act === "icsdisc") { if (!confirm("לנתק את היומן?")) return; if (DEMO) { state.connections.ics = { available: true, connected: false }; renderConnections(); return; } try { const r = await api("DELETE", "/api/connect/ics"); state.connections = r.connections; renderConnections(); toast("נותק"); } catch (err) { toast(err.message); } return; }

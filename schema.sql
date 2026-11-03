@@ -284,3 +284,12 @@ CREATE TABLE IF NOT EXISTS noni_sms (
   created_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at    TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+-- בראשית: חתימת השינויים האחרונה שנשלחה כהתראה (לכל משתמש ותאריך)
+CREATE TABLE IF NOT EXISTS noni_bereshet_seen (
+  user_id    BIGINT NOT NULL REFERENCES ast_user(id) ON DELETE CASCADE,
+  day        DATE NOT NULL,
+  sig        TEXT NOT NULL DEFAULT '',
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  PRIMARY KEY (user_id, day)
+);

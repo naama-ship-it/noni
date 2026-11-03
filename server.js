@@ -27,6 +27,7 @@ pgTypes.setTypeParser(1082, v => v);   // DATE כמחרוזת YYYY-MM-DD — ב�
 const jose = require("jose");
 const crypto = require("crypto");
 const ICS = require("./ics");
+const BER = require("./bereshet");
 
 const VERSION = "2026-11-02-05";
 const PORT = Number(process.env.PORT || 8080);
@@ -505,7 +506,8 @@ async function connectionsOut(u) {
   const g = r.rows.find(x => x.provider === "google");
   const granted = GOOGLE_SCOPES.filter(sc => g && new RegExp(sc === "gmail" ? "gmail" : "calendar").test(g.scopes || ""));
   const ic = r.rows.find(x => x.provider === "ics");
-  return { sms: await smsOut(u), ics: { available: !!CONN_KEY, connected: !!ic, label: ic ? ic.account_email : "", error: ic ? ic.last_error : "", since: ic ? ic.updated_at : null },
+  const bc = r.rows.find(x => x.provider === "bereshet");
+  return { bereshet: { available: !!CONN_KEY, connected: !!bc, kind: bc ? bc.scopes : "", label: bc ? bc.account_email : "", error: bc ? bc.last_error : "" }, sms: await smsOut(u), ics: { available: !!CONN_KEY, connected: !!ic, label: ic ? ic.account_email : "", error: ic ? ic.last_error : "", since: ic ? ic.updated_at : null },
     google: { available: googleReady(), scopes: GOOGLE_SCOPES, granted, connected: !!g && g.status === "active", email: g ? g.account_email : "", status: g ? g.status : "none", error: g ? g.last_error : "", since: g ? g.updated_at : null } };
 }
 async function googleAccessToken(u) {
@@ -551,6 +553,45 @@ async function toolCalendar(u, inp) {
   events.forEach(e => delete e._t);
   if (!events.length && errors.length) return { error: errors.join(" · ") };
   return { from, to, events, warnings: errors.length ? errors : undefined };
+}
+/* ---- בראשית: מקור לכל משתמש (קוד מורה מוצפן, או כיתה) ---- */
+async function bereshetSrc(u) {
+  const c = await getConnection(u, "bereshet");
+  if (!c) return null;
+  try { const v = JSON.parse(decrypt(c.refresh_enc)); return v.code ? { kind: "code", code: v.code } : { kind: "class", classId: v.classId, className: c.account_email }; } catch (e) { return null; }
+}
+async function bereshetDay(u, date) {
+  const src = await bereshetSrc(u); if (!src) return null;
+  try {
+    const x = await BER.day(src, date);
+    if (!x.ok && x.error === "unauthorized") { await pool.query(`UPDATE ast_connection SET status='error', last_error=$2, updated_at=now() WHERE user_id=$1 AND provider='bereshet'`, [u.id, "הקוד כבר לא מאושר בבראשית"]); return { error: "הקוד לבראשית כבר לא מאושר — כדאי להזין אותו מחדש בהגדרות." }; }
+    return x;
+  } catch (e) { return { error: "לא הצלחתי לקרוא מבראשית כרגע." }; }
+}
+const addDays = (d, n) => new Date(Date.parse(d + "T12:00:00Z") + n * 864e5).toISOString().slice(0, 10);
+/* התראות שינויים — דרך ערוץ התזכורות הקיים (SMS); לכל היותר כל 15 דקות, 06:00–21:00 */
+let berLastRun = 0;
+async function cronBereshet() {
+  if (Date.now() - berLastRun < 15 * 60e3) return 0; berLastRun = Date.now();
+  const n = nowParts(); const h = Number(n.time.slice(0, 2)); if (h < 6 || h >= 21 || !smsReady()) return 0;
+  const r = await pool.query(`SELECT c.user_id, s.phone FROM ast_connection c JOIN noni_sms s ON s.user_id=c.user_id AND s.verified_at IS NOT NULL WHERE c.provider='bereshet' AND c.status='active' LIMIT 500`);
+  let sent = 0;
+  for (const row of r.rows) {
+    for (const date of [n.date, addDays(n.date, 1)]) {
+      try {
+        const x = await bereshetDay({ id: row.user_id }, date); if (!x || !x.ok || x.error) continue;
+        const sig = BER.signature(x), txt = BER.summary(x);
+        const prev = (await pool.query(`SELECT sig FROM noni_bereshet_seen WHERE user_id=$1 AND day=$2`, [row.user_id, date])).rows[0];
+        if (prev && prev.sig === sig) continue;
+        await pool.query(`INSERT INTO noni_bereshet_seen (user_id, day, sig) VALUES ($1,$2,$3) ON CONFLICT (user_id, day) DO UPDATE SET sig=$3, updated_at=now()`, [row.user_id, date, sig]);
+        if (!txt) continue;   // אין שינויים — רק שומרים
+        const when = date === n.date ? "היום" : "מחר";
+        await smsSend(row.phone, `נוני · שינויים בבראשית ${when}:\n` + txt.slice(0, 600)); sent++;
+      } catch (e) { console.error("bereshet cron", String(e.message || e).slice(0, 120)); }
+    }
+  }
+  await pool.query(`DELETE FROM noni_bereshet_seen WHERE day < (now() - interval '7 days')::date`).catch(() => {});
+  return sent;
 }
 /* ---- יומן ICS (אפל / כל יומן) — קישור מנוי, מוצפן במסד, קריאה בלבד ---- */
 const icsCache = new Map();   // user_id → { at, url, events }
@@ -645,7 +686,8 @@ async function planData(u, date) {
   const gc = await getConnection(u, "google");
   if ((gc && gc.status === "active" && GOOGLE_SCOPES.includes("calendar")) || await getConnection(u, "ics")) { const c = await toolCalendar(u, { fromDate: day, toDate: day }); calendar = c.error ? { error: c.message || c.error } : c.events; }
   const chores = (await listChores(u)).filter(c => c.nextDate && c.nextDate <= day);
-  return { date: day, now: day === n.date ? n.time : "", weekday: n.weekday, calendar, tasks, reminders, chores, guidance: "הצע/י לוח זמנים לפי שעות: קודם אירועי היומן (קבועים), ואז המשימות לפי עדיפות ומועד, עם הפסקות. אם אין מספיק זמן — אמור/י מה לדחות למחר. קצר, בעברית, בלי כותרות." };
+  const bereshet = await bereshetDay(u, day);
+  return { date: day, now: day === n.date ? n.time : "", weekday: n.weekday, calendar, bereshet, tasks, reminders, chores, guidance: "הצע/י לוח זמנים לפי שעות: קודם אירועי היומן ושיעורי בראשית (קבועים; שינויים/ביטולים מבראשית גוברים על המערכת הרגילה), ואז המשימות לפי עדיפות ומועד, עם הפסקות. אם אין מספיק זמן — אמור/י מה לדחות למחר. קצר, בעברית, בלי כותרות." };
 }
 
 /* OAuth: התחלה — יצירת state והפניה לגוגל */
@@ -710,6 +752,7 @@ const TOOLS = [
   { name: "add_expense", description: "רישום הוצאה: amount בשקלים, category אחת מ: מזון · בית · ילדים · רכב · בריאות · פנאי · ביגוד · חשבונות · אחר (אפשר לתת תיאור חופשי והוא ימופה), note = בית העסק/תיאור קצר, date YYYY-MM-DD (ברירת מחדל היום).", input_schema: { type: "object", properties: { amount: { type: "number" }, category: { type: "string" }, note: { type: "string" }, date: { type: "string" } }, required: ["amount"] } },
   { name: "list_expenses", description: "הוצאות בטווח תאריכים (ברירת מחדל: מתחילת החודש) עם סכום כולל ופילוח לפי קטגוריה.", input_schema: { type: "object", properties: { fromDate: { type: "string" }, toDate: { type: "string" } } } },
   { name: "expense_summary", description: "סיכום הוצאות: השבוע, החודש (לפי קטגוריות) והחודש הקודם להשוואה.", input_schema: { type: "object", properties: {} } },
+  { name: "bereshet_day", description: "מערכת השעות והשינויים מבראשית (בית הספר) ליום מסוים: שיעורים, מילויי מקום, ביטולים, היעדרויות ואירועים מיוחדים. השתמש/י כששואלים על שיעורים, מערכת, שינויים או מילוי מקום. אם מוחזר null — בראשית לא חוברה (הגדרות ← חיבורים ← בראשית).", input_schema: { type: "object", properties: { date: { type: "string", description: "YYYY-MM-DD, ברירת מחדל היום" } } } },
   { name: "plan_day", description: "הנתונים לתכנון היום: אירועי היומן, המשימות הפתוחות (כולל שעבר מועדן) ותזכורות. השתמש/י כשמבקשים לתכנן או לסדר את היום, ואז הצע/י לוח זמנים לפי שעות עם הפסקות, והצע/י מה לדחות.", input_schema: { type: "object", properties: { date: { type: "string", description: "YYYY-MM-DD, ברירת מחדל היום" } } } },
 ];
 
@@ -737,6 +780,7 @@ async function runTool(u, name, input) {
     case "add_expense": return addExpense(u, input, u.channel === "wa" ? "wa" : "chat");
     case "list_expenses": return listExpenses(u, input);
     case "expense_summary": return expenseSummary(u);
+    case "bereshet_day": return (await bereshetDay(u, isoDate(input.date) ? input.date : nowParts().date)) || { error: "בראשית לא מחוברת — הגדרות ← חיבורים ← בראשית." };
     case "plan_day": return planData(u, input.date);
     default: return { error: "כלי לא מוכר: " + name };
   }
@@ -1226,7 +1270,7 @@ const server = http.createServer(async (req, res) => {
     }
   }
   try {
-    if (p === "/api/health") return json(res, 200, { ok: true, version: VERSION, provider: LLM_PROVIDER, model: LLM_PROVIDER === "gemini" ? GEMINI_MODEL : MODEL, region: LLM_PROVIDER === "gemini" ? GEMINI_REGION : VERTEX_REGION, auth: AUTH_MODE, db: !!process.env.DB_HOST || !!process.env.DB_SOCKET, google: googleReady(), googleScopes: GOOGLE_SCOPES, whatsapp: !!WA_PHONE_ID, sms: smsReady(), ics: true });
+    if (p === "/api/health") return json(res, 200, { ok: true, version: VERSION, provider: LLM_PROVIDER, model: LLM_PROVIDER === "gemini" ? GEMINI_MODEL : MODEL, region: LLM_PROVIDER === "gemini" ? GEMINI_REGION : VERTEX_REGION, auth: AUTH_MODE, db: !!process.env.DB_HOST || !!process.env.DB_SOCKET, google: googleReady(), googleScopes: GOOGLE_SCOPES, whatsapp: !!WA_PHONE_ID, sms: smsReady(), ics: true, bereshet: !!CONN_KEY });
     if (p.startsWith("/l/")) return serveStatic(req, res, "/list.html");
     if (!p.startsWith("/api/")) return serveStatic(req, res, p);
     if (p === "/api/config" && req.method === "GET") return json(res, 200, { ok: true, googleClientId: GOOGLE_CLIENT_ID, auth: AUTH_MODE, whatsapp: !!WA_PHONE_ID, waNumber: WA_DISPLAY_NUMBER });
@@ -1251,7 +1295,8 @@ const server = http.createServer(async (req, res) => {
     if (p === "/api/wa/webhook" && req.method === "POST") return waWebhook(req, res);
     if (p === "/api/cron/reminders" && req.method === "POST") {
       if (!CRON_KEY || req.headers["x-cron-key"] !== CRON_KEY) return json(res, 403, { ok: false, error: "forbidden" });
-      return json(res, 200, { ok: true, sent: await cronReminders() });
+      const sent = await cronReminders(); const ber = await cronBereshet().catch(e => { console.error("bereshet cron", String(e.message).slice(0, 120)); return 0; });
+      return json(res, 200, { ok: true, sent, bereshet: ber });
     }
 
     /* ---- רשימה משותפת בקישור (בלי כניסה) ---- */
@@ -1397,6 +1442,29 @@ const server = http.createServer(async (req, res) => {
     if (p === "/api/connect/google" && req.method === "GET") return oauthStart(u, res);
     if (p === "/api/connect/google/callback" && req.method === "GET") return oauthCallback(u, url, res);
     if (p === "/api/connect/wish" && req.method === "POST") { const b = await readBody(req); const pr = String(b.provider || "").slice(0, 30); await log(u.tenant_id, u.email, "connect.wish", pr); return json(res, 200, { ok: true }); }
+    if (p === "/api/bereshet/classes" && req.method === "GET") return json(res, 200, { ok: true, classes: await BER.classes().catch(() => []) });
+    if (p === "/api/bereshet" && req.method === "POST") {
+      if (!CONN_KEY) return json(res, 503, { ok: false, error: "חסר מפתח הצפנה בשרת." });
+      const b = await readBody(req); let label, kind, payload;
+      if (b.code) {
+        const code = str(b.code, 80).trim();
+        if (!/^[\w\-]{2,80}$/.test(code)) return json(res, 400, { ok: false, error: "הקוד לא נראה תקין." });
+        const v = await BER.validateCode(code);
+        if (!v.ok) return json(res, 400, { ok: false, error: v.error });
+        label = v.name; kind = "code"; payload = { code };
+      } else if (b.classId) {
+        const cl = (await BER.classes()).find(c => c.id === String(b.classId));
+        if (!cl) return json(res, 400, { ok: false, error: "הכיתה לא נמצאה בבראשית." });
+        label = cl.name; kind = "class"; payload = { classId: cl.id };
+      } else return json(res, 400, { ok: false, error: "צריך להזין קוד מורה או לבחור כיתה." });
+      await pool.query(`INSERT INTO ast_connection (tenant_id, user_id, provider, account_email, scopes, refresh_enc, status) VALUES ($1,$2,'bereshet',$3,$4,$5,'active')
+        ON CONFLICT (user_id, provider) DO UPDATE SET account_email=$3, scopes=$4, refresh_enc=$5, status='active', last_error='', updated_at=now()`, [u.tenant_id, u.id, label, kind, encrypt(JSON.stringify(payload))]);
+      await pool.query(`DELETE FROM noni_bereshet_seen WHERE user_id=$1`, [u.id]);
+      await log(u.tenant_id, u.email, "connect.bereshet", kind);
+      return json(res, 200, { ok: true, connections: await connectionsOut(u) });
+    }
+    if (p === "/api/bereshet" && req.method === "DELETE") { await pool.query(`DELETE FROM ast_connection WHERE user_id=$1 AND provider='bereshet'`, [u.id]); await pool.query(`DELETE FROM noni_bereshet_seen WHERE user_id=$1`, [u.id]); await log(u.tenant_id, u.email, "disconnect.bereshet", ""); return json(res, 200, { ok: true, connections: await connectionsOut(u) }); }
+    if (p === "/api/bereshet/day" && req.method === "GET") { const d = url.searchParams.get("date"); const x = await bereshetDay(u, isoDate(d) ? d : nowParts().date); return json(res, 200, { ok: true, day: x }); }
     if (p === "/api/connect/ics" && req.method === "POST") {
       const b = await readBody(req); const url = normIcsUrl(str(b.url, 2000));
       if (!url) return json(res, 400, { ok: false, error: "הקישור לא נראה כמו קישור ליומן. הוא אמור להתחיל ב-https:// או webcal://" });
@@ -1432,8 +1500,9 @@ const server = http.createServer(async (req, res) => {
       const ex = await expenseSummary(u);
       const lists = await listsOut(u);
       const shopping = lists.find(l => l.kind === "shopping");
+      const [berToday, berTomorrow] = await Promise.all([bereshetDay(u, n.date), bereshetDay(u, addDays(n.date, 1))]);
       await log(u.tenant_id, u.email, "brief", (calendar ? "calendar" : "") + (mail && !mail.error ? ",mail" : ""));
-      return json(res, 200, { ok: true, now: n, tasks: today, reminders: soon, calendar, mail, chores, expenses: { week: ex.week.total, month: ex.month.total }, shopping: shopping ? shopping.items.filter(i => !i.done).length : 0 });
+      return json(res, 200, { ok: true, now: n, tasks: today, reminders: soon, calendar, bereshet: berToday ? { today: berToday, tomorrow: berTomorrow } : null, mail, chores, expenses: { week: ex.week.total, month: ex.month.total }, shopping: shopping ? shopping.items.filter(i => !i.done).length : 0 });
     }
     /* ---- תכנון היום: המודל מציע לוח זמנים מהיומן, המשימות והתזכורות ---- */
     if (p === "/api/plan" && req.method === "POST") {
